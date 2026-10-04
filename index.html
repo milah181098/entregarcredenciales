@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entrega de credenciales</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#EEF2F6;font-family:Manrope,system-ui,sans-serif;color:#0E1B2C}
+  .wrap{max-width:1120px;margin:0 auto;padding:32px 16px;display:flex;flex-direction:column;gap:24px}
+  header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px}
+  h1{margin:0;font-size:28px;font-weight:800;letter-spacing:-.02em}
+  header p{margin:0;font-size:14px;color:#4A5868}
+  .cols{display:flex;flex-wrap:wrap;gap:24px}
+  .card{flex:1 1 420px;min-width:0;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:20px}
+  .in{background:#fff;box-shadow:0 1px 2px rgba(14,27,44,.06)}
+  .out{background:#0E1B2C;color:#E8EEF5;gap:16px}
+  .lbl{font-size:13px;font-weight:600;color:#4A5868;text-transform:uppercase;letter-spacing:.06em}
+  .out .lbl{color:#9FB0C3}
+  .field{display:flex;flex-direction:column;gap:8px}
+  textarea{width:100%;resize:vertical;border-radius:12px;padding:14px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;line-height:1.5}
+  #raw{height:210px;border:1px solid #C9D3DE;color:#0E1B2C;background:#F8FAFC}
+  #out{flex:1 1 auto;min-height:340px;border:1px solid #24364D;color:#E8EEF5;background:#13253B;line-height:1.55}
+  textarea:focus,button:focus-visible{outline:2px solid #0B6FD6;outline-offset:1px}
+  .profiles{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+  .profiles button{height:52px;border-radius:12px;border:1px solid #D5DDE6;background:#F3F6F9;color:#0E1B2C;font:800 20px Manrope,system-ui,sans-serif;cursor:pointer}
+  .profiles button.on{background:#0B5CAD;border-color:#0B5CAD;color:#fff}
+  .mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+  .info{display:flex;flex-direction:column;gap:6px;font-size:14px}
+  .info div{display:flex;gap:8px}
+  .info span{color:#4A5868;min-width:96px}
+  .info strong{word-break:break-all}
+  .ghost{align-self:flex-start;min-height:44px;padding:0 18px;border-radius:10px;border:1px solid #C9D3DE;background:#fff;color:#0E1B2C;font:600 14px Manrope,system-ui,sans-serif;cursor:pointer}
+  .head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  #status{font-size:13px;font-weight:600}
+  #copy{min-height:56px;border-radius:12px;border:none;background:#0B5CAD;color:#fff;font:800 17px Manrope,system-ui,sans-serif;cursor:pointer}
+  #copy.ok{background:#16804F}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Entrega de credenciales</h1>
+    <p>Pega el texto, elige el perfil y copia.</p>
+  </header>
+
+  <div class="cols">
+    <section class="card in">
+      <div class="field">
+        <label class="lbl" for="raw">1 · Texto de la cuenta</label>
+        <textarea id="raw" placeholder="CRUNCHYROLL&#10;SOPORTE 4K&#10;STREAMPLAY&#10;correo@gmail.com&#10;contraseña"></textarea>
+      </div>
+
+      <div class="field">
+        <span class="lbl">2 · Número de perfil</span>
+        <div class="profiles" id="profiles"></div>
+        <span style="font-size:14px;color:#4A5868">PIN: <strong class="mono" id="pin" style="color:#0E1B2C">—</strong></span>
+      </div>
+
+      <div class="info">
+        <div><span>App</span><strong id="iApp">—</strong></div>
+        <div><span>Correo</span><strong id="iMail">—</strong></div>
+        <div><span>Contraseña</span><strong id="iPass">—</strong></div>
+      </div>
+
+      <button type="button" class="ghost" id="clear">Limpiar todo</button>
+    </section>
+
+    <section class="card out">
+      <div class="head">
+        <span class="lbl">3 · Mensaje listo</span>
+        <span id="status"></span>
+      </div>
+      <textarea id="out" readonly aria-label="Mensaje generado"></textarea>
+      <button type="button" id="copy">Copiar mensaje</button>
+    </section>
+  </div>
+</div>
+
+<script>
+(function () {
+  var NETFLIX_AVISO = '`Si en unas semanas te sale aviso un aviso No formas parte del hogar, ingresar a esta web: https://sites.google.com/view/waveplayhogar`';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var raw = $('raw'), out = $('out'), copyBtn = $('copy');
+  var profile = null, timer = null;
+
+  // Botones de perfil 1–7
+  for (var n = 1; n <= 7; n++) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = n;
+    b.setAttribute('aria-label', 'Perfil ' + n);
+    b.dataset.n = n;
+    b.addEventListener('click', function () {
+      profile = Number(this.dataset.n);
+      update();
+    });
+    $('profiles').appendChild(b);
+  }
+
+  function parse(text) {
+    var lines = text.split(/\r?\n/)
+      .map(function (s) { return s.trim(); })
+      .filter(function (s) { return s && !/^[*•\-_.\s]+$/.test(s); });
+    var emailRe = /[^\s*]+@[^\s*]+\.[^\s*]+/;
+    var idx = -1;
+    for (var i = 0; i < lines.length; i++) { if (emailRe.test(lines[i])) { idx = i; break; } }
+    return {
+      app: (lines.length && idx !== 0) ? lines[0].replace(/\*/g, '').trim().toUpperCase() : '',
+      email: idx >= 0 ? lines[idx].match(emailRe)[0] : '',
+      pass: (idx >= 0 && lines[idx + 1]) ? lines[idx + 1].replace(/^\*+|\*+$/g, '').trim() : ''
+    };
+  }
+
+  function build(p) {
+    var pin = profile ? String(profile) + String(profile) + '11' : '';
+    var txt =
+      '✅ *ACTIVACIÓN ' + (p.app || '[APP]') + '* \n\n' +
+      '📧 *CORREO:*\n' + (p.email || '[correo]') + '\n' +
+      '🔑 *CONTRASEÑA:*\n' + (p.pass || '[contraseña]') + '\n' +
+      '🖥 *PERFIL:* ' + (profile || '[perfil]') + '\n' +
+      '🔐 *PIN:* ' + (pin || '[pin]') + '\n' +
+      '🗓️ *VENCE:* 30 días';
+    if (p.app.indexOf('NETFLIX') !== -1) txt += '\n\n' + NETFLIX_AVISO;
+    return { text: txt, pin: pin };
+  }
+
+  function update() {
+    var p = parse(raw.value);
+    var r = build(p);
+    out.value = r.text;
+    $('pin').textContent = r.pin || '—';
+    $('iApp').textContent = p.app || '—';
+    $('iMail').textContent = p.email || '—';
+    $('iPass').textContent = p.pass || '—';
+
+    var missing = [];
+    if (!p.app) missing.push('app');
+    if (!p.email) missing.push('correo');
+    if (!p.pass) missing.push('contraseña');
+    if (!profile) missing.push('perfil');
+    var st = $('status');
+    if (missing.length) { st.textContent = 'Falta: ' + missing.join(', '); st.style.color = '#F2B36B'; }
+    else { st.textContent = p.app.indexOf('NETFLIX') !== -1 ? 'Listo · Netflix' : 'Listo'; st.style.color = '#5FD39A'; }
+
+    document.querySelectorAll('#profiles button').forEach(function (b) {
+      b.classList.toggle('on', Number(b.dataset.n) === profile);
+    });
+    resetCopy();
+  }
+
+  function resetCopy() { copyBtn.textContent = 'Copiar mensaje'; copyBtn.classList.remove('ok'); }
+  function copied() {
+    copyBtn.textContent = '¡Copiado!';
+    copyBtn.classList.add('ok');
+    clearTimeout(timer);
+    timer = setTimeout(resetCopy, 1800);
+  }
+  function fallbackCopy() {
+    out.focus(); out.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    copied();
+  }
+
+  copyBtn.addEventListener('click', function () {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(out.value).then(copied, fallbackCopy);
+    } else { fallbackCopy(); }
+  });
+
+  $('clear').addEventListener('click', function () {
+    raw.value = ''; profile = null; update(); raw.focus();
+  });
+
+  raw.addEventListener('input', update);
+  update();
+})();
+</script>
+</body>
+</html>
