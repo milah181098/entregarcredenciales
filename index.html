@@ -1,3 +1,6 @@
+Aquí tienes el código completo. Cópialo entero y pégalo en tu index.html:
+
+```html
 <!doctype html>
 <html lang="es">
 <head>
@@ -21,12 +24,19 @@
   .out .lbl{color:#9FB0C3}
   .field{display:flex;flex-direction:column;gap:8px}
   textarea{width:100%;resize:vertical;border-radius:12px;padding:14px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;line-height:1.5}
-  #raw{height:210px;border:1px solid #C9D3DE;color:#0E1B2C;background:#F8FAFC}
-  #out{flex:1 1 auto;min-height:340px;border:1px solid #24364D;color:#E8EEF5;background:#13253B;line-height:1.55}
-  textarea:focus,button:focus-visible{outline:2px solid #0B6FD6;outline-offset:1px}
+  #raw{height:190px;border:1px solid #C9D3DE;color:#0E1B2C;background:#F8FAFC}
+  #out{flex:1 1 auto;min-height:380px;border:1px solid #24364D;color:#E8EEF5;background:#13253B;line-height:1.55}
+  textarea:focus,input:focus,button:focus-visible{outline:2px solid #0B6FD6;outline-offset:1px}
+  .pick{border-radius:12px;border:1px solid #D5DDE6;background:#F3F6F9;color:#0E1B2C;font-family:Manrope,system-ui,sans-serif;font-weight:800;cursor:pointer}
+  .pick.on{background:#0B5CAD;border-color:#0B5CAD;color:#fff}
+  .modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .modes .pick{height:48px;font-size:15px}
+  .renov{display:none;flex-direction:column;gap:6px;padding:14px;border-radius:12px;background:#FFF6EA;border:1px solid #F1D3A8}
+  .renov.show{display:flex}
+  .renov label{font-size:13px;font-weight:600;color:#6B4A12}
+  .renov input{height:44px;width:100%;border-radius:10px;border:1px solid #E2C597;padding:0 12px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;color:#0E1B2C;background:#fff}
   .profiles{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
-  .profiles button{height:52px;border-radius:12px;border:1px solid #D5DDE6;background:#F3F6F9;color:#0E1B2C;font:800 20px Manrope,system-ui,sans-serif;cursor:pointer}
-  .profiles button.on{background:#0B5CAD;border-color:#0B5CAD;color:#fff}
+  .profiles .pick{height:52px;font-size:20px}
   .mono{font-family:'JetBrains Mono',ui-monospace,monospace}
   .info{display:flex;flex-direction:column;gap:6px;font-size:14px}
   .info div{display:flex;gap:8px}
@@ -54,12 +64,25 @@
       </div>
 
       <div class="field">
-        <span class="lbl">2 · Número de perfil</span>
+        <span class="lbl">2 · Tipo de entrega</span>
+        <div class="modes">
+          <button type="button" class="pick on" id="mVenta">Venta</button>
+          <button type="button" class="pick" id="mRenov">Renovación</button>
+        </div>
+        <div class="renov" id="renovBox">
+          <label for="newpass">Contraseña del mes (vacío = se mantiene la misma)</label>
+          <input id="newpass" type="text" placeholder="Nueva contraseña">
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="lbl">3 · Número de perfil</span>
         <div class="profiles" id="profiles"></div>
         <span style="font-size:14px;color:#4A5868">PIN: <strong class="mono" id="pin" style="color:#0E1B2C">—</strong></span>
       </div>
 
       <div class="info">
+        <div><span>Formato</span><strong id="iKind">—</strong></div>
         <div><span>App</span><strong id="iApp">—</strong></div>
         <div><span>Correo</span><strong id="iMail">—</strong></div>
         <div><span>Contraseña</span><strong id="iPass">—</strong></div>
@@ -70,7 +93,7 @@
 
     <section class="card out">
       <div class="head">
-        <span class="lbl">3 · Mensaje listo</span>
+        <span class="lbl">4 · Mensaje listo</span>
         <span id="status"></span>
       </div>
       <textarea id="out" readonly aria-label="Mensaje generado"></textarea>
@@ -82,24 +105,35 @@
 <script>
 (function () {
   var NETFLIX_AVISO = '`Si en unas semanas te sale aviso un aviso No formas parte del hogar, ingresar a esta web: https://sites.google.com/view/waveplayhogar`';
+  var PRIME_AVISO = 'No comprar o alquilar películas que pone Prime Video en sección de alquiler porque es posible que se bloquee la cuenta por error de pago.';
+  var PIN_CUENTA_PRIME = '11111';
 
   var $ = function (id) { return document.getElementById(id); };
-  var raw = $('raw'), out = $('out'), copyBtn = $('copy');
-  var profile = null, timer = null;
+  var raw = $('raw'), out = $('out'), copyBtn = $('copy'), newpass = $('newpass');
+  var profile = null, mode = 'venta', timer = null;
 
   // Botones de perfil 1–7
   for (var n = 1; n <= 7; n++) {
     var b = document.createElement('button');
     b.type = 'button';
+    b.className = 'pick';
     b.textContent = n;
     b.setAttribute('aria-label', 'Perfil ' + n);
     b.dataset.n = n;
-    b.addEventListener('click', function () {
-      profile = Number(this.dataset.n);
-      update();
-    });
+    b.addEventListener('click', function () { profile = Number(this.dataset.n); update(); });
     $('profiles').appendChild(b);
   }
+
+  function setMode(m) {
+    mode = m;
+    $('mVenta').classList.toggle('on', m === 'venta');
+    $('mRenov').classList.toggle('on', m === 'renov');
+    $('renovBox').classList.toggle('show', m === 'renov');
+    if (m === 'renov') newpass.focus();
+    update();
+  }
+  $('mVenta').addEventListener('click', function () { setMode('venta'); });
+  $('mRenov').addEventListener('click', function () { setMode('renov'); });
 
   function parse(text) {
     var lines = text.split(/\r?\n/)
@@ -108,45 +142,85 @@
     var emailRe = /[^\s*]+@[^\s*]+\.[^\s*]+/;
     var idx = -1;
     for (var i = 0; i < lines.length; i++) { if (emailRe.test(lines[i])) { idx = i; break; } }
+    var head = (idx >= 0 ? lines.slice(0, idx) : lines.slice(0, 1))
+      .map(function (s) { return s.replace(/\*/g, '').trim().toUpperCase(); });
+    var all = head.join(' ');
+    var isTemporal = all.indexOf('TEMPORAL') !== -1;
+    var app = '';
+    for (var j = 0; j < head.length; j++) { if (head[j] && head[j] !== 'TEMPORAL') { app = head[j]; break; } }
+    if (!app && isTemporal) app = 'TEMPORAL';
     return {
-      app: (lines.length && idx !== 0) ? lines[0].replace(/\*/g, '').trim().toUpperCase() : '',
+      app: app,
       email: idx >= 0 ? lines[idx].match(emailRe)[0] : '',
-      pass: (idx >= 0 && lines[idx + 1]) ? lines[idx + 1].replace(/^\*+|\*+$/g, '').trim() : ''
+      pass: (idx >= 0 && lines[idx + 1]) ? lines[idx + 1].replace(/^\*+|\*+$/g, '').trim() : '',
+      isTemporal: isTemporal,
+      isPrime: all.indexOf('PRIME') !== -1,
+      isNetflix: all.indexOf('NETFLIX') !== -1
     };
   }
 
-  function build(p) {
-    var pin = profile ? String(profile) + String(profile) + '11' : '';
-    var txt =
-      '✅ *ACTIVACIÓN ' + (p.app || '[APP]') + '* \n\n' +
-      '📧 *CORREO:*\n' + (p.email || '[correo]') + '\n' +
-      '🔑 *CONTRASEÑA:*\n' + (p.pass || '[contraseña]') + '\n' +
-      '🖥 *PERFIL:* ' + (profile || '[perfil]') + '\n' +
-      '🔐 *PIN:* ' + (pin || '[pin]') + '\n' +
-      '🗓️ *VENCE:* 30 días';
-    if (p.app.indexOf('NETFLIX') !== -1) txt += '\n\n' + NETFLIX_AVISO;
+  function build(p, pass) {
+    // PIN: XX11 normal, XX111 en Prime
+    var pin = profile ? String(profile) + String(profile) + (p.isPrime ? '111' : '11') : '';
+    var E = p.email || '[correo]', C = pass || '[contraseña]', P = profile || '[perfil]', N = pin || '[pin]';
+    var txt;
+    if (p.isTemporal) {
+      txt =
+        'Revisaremos el error y le informaremos cuando esté solucionado. Si no es posible reactivar la misma cuenta, le daremos un reemplazo.\n' +
+        'Por ahora, le daremos un reemplazo temporal para que acceda hasta solucionar el inconveniente.\n' +
+        'Correo: ' + E + '\n' +
+        'Contraseña: ' + C + '\n' +
+        'Perfil: ' + P + '\n' +
+        'PIN: ' + N + '\n' +
+        'Duración: 1 DÍA';
+    } else if (p.isPrime) {
+      txt =
+        '✅ *ACTIVACIÓN PRIME* \n\n' +
+        '📧 *CORREO:*\n' + E + '\n' +
+        '🔑 *CONTRASEÑA:*\n' + C + '\n' +
+        '🖥 *PERFIL:* ' + P + '\n' +
+        '🔐 *PIN PERFIL:* ' + N + '\n' +
+        '🔐 *PIN CUENTA:* ' + PIN_CUENTA_PRIME + '\n' +
+        '🗓️ *VENCE:* 30 días\n\n' +
+        '⚠️ *IMPORTANTE:*\n' + PRIME_AVISO;
+    } else {
+      txt =
+        '✅ *ACTIVACIÓN ' + (p.app || '[APP]') + '* \n\n' +
+        '📧 *CORREO:*\n' + E + '\n' +
+        '🔑 *CONTRASEÑA:*\n' + C + '\n' +
+        '🖥 *PERFIL:* ' + P + '\n' +
+        '🔐 *PIN:* ' + N + '\n' +
+        '🗓️ *VENCE:* 30 días';
+      if (p.isNetflix) txt += '\n\n' + NETFLIX_AVISO;
+    }
     return { text: txt, pin: pin };
   }
 
   function update() {
     var p = parse(raw.value);
-    var r = build(p);
+    var np = newpass.value.trim();
+    var useNew = mode === 'renov' && np;
+    var pass = useNew ? np : p.pass;
+    var r = build(p, pass);
+
     out.value = r.text;
     $('pin').textContent = r.pin || '—';
+    var kind = p.isTemporal ? 'Temporal (1 día)' : p.isPrime ? 'Prime Video' : p.isNetflix ? 'Netflix' : 'Normal';
+    $('iKind').textContent = kind + (mode === 'renov' ? ' · Renovación' : '');
     $('iApp').textContent = p.app || '—';
     $('iMail').textContent = p.email || '—';
-    $('iPass').textContent = p.pass || '—';
+    $('iPass').textContent = pass ? pass + (useNew ? '  (nueva)' : '') : '—';
 
     var missing = [];
     if (!p.app) missing.push('app');
     if (!p.email) missing.push('correo');
-    if (!p.pass) missing.push('contraseña');
+    if (!pass) missing.push('contraseña');
     if (!profile) missing.push('perfil');
     var st = $('status');
     if (missing.length) { st.textContent = 'Falta: ' + missing.join(', '); st.style.color = '#F2B36B'; }
-    else { st.textContent = p.app.indexOf('NETFLIX') !== -1 ? 'Listo · Netflix' : 'Listo'; st.style.color = '#5FD39A'; }
+    else { st.textContent = 'Listo'; st.style.color = '#5FD39A'; }
 
-    document.querySelectorAll('#profiles button').forEach(function (b) {
+    document.querySelectorAll('#profiles .pick').forEach(function (b) {
       b.classList.toggle('on', Number(b.dataset.n) === profile);
     });
     resetCopy();
@@ -172,12 +246,14 @@
   });
 
   $('clear').addEventListener('click', function () {
-    raw.value = ''; profile = null; update(); raw.focus();
+    raw.value = ''; newpass.value = ''; profile = null; setMode('venta'); raw.focus();
   });
 
   raw.addEventListener('input', update);
+  newpass.addEventListener('input', update);
   update();
 })();
 </script>
 </body>
 </html>
+```
