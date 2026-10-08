@@ -1,4 +1,4 @@
-Aquí tienes el código actualizado. Cópialo entero y reemplaza todo el contenido de tu index.html:
+Aquí está el código completo. Cópialo entero y reemplaza todo el contenido de tu index.html:
 
 ```html
 <!doctype html>
@@ -12,20 +12,18 @@ Aquí tienes el código actualizado. Cópialo entero y reemplaza todo el conteni
 <style>
   *{box-sizing:border-box}
   body{margin:0;background:#EEF2F6;font-family:Manrope,system-ui,sans-serif;color:#0E1B2C}
-  .wrap{max-width:1120px;margin:0 auto;padding:32px 16px;display:flex;flex-direction:column;gap:24px}
+  .wrap{max-width:1180px;margin:0 auto;padding:32px 16px;display:flex;flex-direction:column;gap:24px}
   header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px}
   h1{margin:0;font-size:28px;font-weight:800;letter-spacing:-.02em}
   header p{margin:0;font-size:14px;color:#4A5868}
-  .cols{display:flex;flex-wrap:wrap;gap:24px}
+  .cols{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
   .card{flex:1 1 420px;min-width:0;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:20px}
   .in{background:#fff;box-shadow:0 1px 2px rgba(14,27,44,.06)}
   .out{background:#0E1B2C;color:#E8EEF5;gap:16px}
   .lbl{font-size:13px;font-weight:600;color:#4A5868;text-transform:uppercase;letter-spacing:.06em}
   .out .lbl{color:#9FB0C3}
   .field{display:flex;flex-direction:column;gap:8px}
-  textarea{width:100%;resize:vertical;border-radius:12px;padding:14px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;line-height:1.5}
-  #raw{height:190px;border:1px solid #C9D3DE;color:#0E1B2C;background:#F8FAFC}
-  #out{flex:1 1 auto;min-height:380px;border:1px solid #24364D;color:#E8EEF5;background:#13253B;line-height:1.55}
+  #raw{width:100%;height:240px;resize:vertical;border-radius:12px;padding:14px;border:1px solid #C9D3DE;color:#0E1B2C;background:#F8FAFC;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;line-height:1.5}
   textarea:focus,input:focus,button:focus-visible{outline:2px solid #0B6FD6;outline-offset:1px}
   .pick{border-radius:12px;border:1px solid #D5DDE6;background:#F3F6F9;color:#0E1B2C;font-family:Manrope,system-ui,sans-serif;font-weight:800;cursor:pointer}
   .pick.on{background:#0B5CAD;border-color:#0B5CAD;color:#fff}
@@ -37,30 +35,38 @@ Aquí tienes el código actualizado. Cópialo entero y reemplaza todo el conteni
   .renov input{height:44px;width:100%;border-radius:10px;border:1px solid #E2C597;padding:0 12px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;color:#0E1B2C;background:#fff}
   .profiles{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
   .profiles .pick{height:52px;font-size:20px}
+  .hint{font-size:13px;color:#4A5868;margin:0}
   .mono{font-family:'JetBrains Mono',ui-monospace,monospace}
   .info{display:flex;flex-direction:column;gap:6px;font-size:14px}
   .info div{display:flex;gap:8px}
   .info span{color:#4A5868;min-width:96px}
-  .info strong{word-break:break-all}
   .ghost{align-self:flex-start;min-height:44px;padding:0 18px;border-radius:10px;border:1px solid #C9D3DE;background:#fff;color:#0E1B2C;font:600 14px Manrope,system-ui,sans-serif;cursor:pointer}
-  .head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
   #status{font-size:13px;font-weight:600}
-  #copy{min-height:56px;border-radius:12px;border:none;background:#0B5CAD;color:#fff;font:800 17px Manrope,system-ui,sans-serif;cursor:pointer}
-  #copy.ok{background:#16804F}
+  #copyAll{min-height:52px;border-radius:12px;border:none;background:#0B5CAD;color:#fff;font:800 16px Manrope,system-ui,sans-serif;cursor:pointer}
+  #copyAll.ok,.msg button.ok{background:#16804F}
+  #list{display:flex;flex-direction:column;gap:14px}
+  .msg{border:1px solid #24364D;background:#13253B;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+  .msg .top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;color:#9FB0C3}
+  .msg .top b{color:#E8EEF5}
+  .msg .warn{color:#F2B36B;font-weight:600}
+  .msg pre{margin:0;white-space:pre-wrap;word-break:break-word;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;line-height:1.55;color:#E8EEF5}
+  .msg button{min-height:44px;border-radius:10px;border:none;background:#0B5CAD;color:#fff;font:800 14px Manrope,system-ui,sans-serif;cursor:pointer}
+  .empty{color:#9FB0C3;font-size:14px;margin:0;padding:24px 0;text-align:center}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <h1>Entrega de credenciales</h1>
-    <p>Pega el texto, elige el perfil y copia.</p>
+    <p>Pega el texto (Ctrl+V en cualquier parte), elige el perfil y copia.</p>
   </header>
 
   <div class="cols">
     <section class="card in">
       <div class="field">
-        <label class="lbl" for="raw">1 · Texto de la cuenta</label>
-        <textarea id="raw" placeholder="CRUNCHYROLL&#10;SOPORTE 4K&#10;STREAMPLAY&#10;correo@gmail.com&#10;contraseña"></textarea>
+        <label class="lbl" for="raw">1 · Texto de la cuenta (una o varias)</label>
+        <textarea id="raw" autofocus placeholder="CRUNCHYROLL&#10;SOPORTE 4K&#10;STREAMPLAY&#10;correo@gmail.com&#10;contraseña"></textarea>
       </div>
 
       <div class="field">
@@ -70,7 +76,7 @@ Aquí tienes el código actualizado. Cópialo entero y reemplaza todo el conteni
           <button type="button" class="pick" id="mRenov">Renovación</button>
         </div>
         <div class="renov" id="renovBox">
-          <label for="newpass">Contraseña del mes (vacío = se mantiene la misma)</label>
+          <label for="newpass">Contraseña del mes para todas (vacío = se mantiene la de cada cuenta)</label>
           <input id="newpass" type="text" placeholder="Nueva contraseña">
         </div>
       </div>
@@ -78,14 +84,12 @@ Aquí tienes el código actualizado. Cópialo entero y reemplaza todo el conteni
       <div class="field">
         <span class="lbl">3 · Número de perfil</span>
         <div class="profiles" id="profiles"></div>
-        <span style="font-size:14px;color:#4A5868">PIN: <strong class="mono" id="pin" style="color:#0E1B2C">—</strong></span>
+        <p class="hint" id="profHint">En venta se aplica a todas las cuentas. En renovación cada cuenta usa su propio perfil y PIN.</p>
       </div>
 
       <div class="info">
-        <div><span>Formato</span><strong id="iKind">—</strong></div>
-        <div><span>App</span><strong id="iApp">—</strong></div>
-        <div><span>Correo</span><strong id="iMail">—</strong></div>
-        <div><span>Contraseña</span><strong id="iPass">—</strong></div>
+        <div><span>Cuentas</span><strong id="iCount">0</strong></div>
+        <div><span>Tipo</span><strong id="iKind">Venta</strong></div>
       </div>
 
       <button type="button" class="ghost" id="clear">Limpiar todo</button>
@@ -93,11 +97,11 @@ Aquí tienes el código actualizado. Cópialo entero y reemplaza todo el conteni
 
     <section class="card out">
       <div class="head">
-        <span class="lbl">4 · Mensaje listo</span>
+        <span class="lbl">4 · Mensajes listos</span>
         <span id="status"></span>
       </div>
-      <textarea id="out" readonly aria-label="Mensaje generado"></textarea>
-      <button type="button" id="copy">Copiar mensaje</button>
+      <div id="list"></div>
+      <button type="button" id="copyAll">Copiar mensaje</button>
     </section>
   </div>
 </div>
@@ -107,12 +111,16 @@ Aquí tienes el código actualizado. Cópialo entero y reemplaza todo el conteni
   var NETFLIX_AVISO = '`Si en unas semanas te sale aviso un aviso No formas parte del hogar, ingresar a esta web: https://sites.google.com/view/waveplayhogar`';
   var PRIME_AVISO = 'No comprar o alquilar películas que pone Prime Video en sección de alquiler porque es posible que se bloquee la cuenta por error de pago.';
   var PIN_CUENTA_PRIME = '11111';
+  // Nombres de plataformas conocidas (para encontrar la app aunque haya otras líneas antes)
+  var PLATFORMS = ['NETFLIX', 'DISNEY', 'PRIME', 'AMAZON', 'HBO', 'MAX', 'CRUNCHYROLL', 'SPOTIFY', 'YOUTUBE', 'PARAMOUNT', 'STAR', 'VIX', 'APPLE', 'UNIVERSAL', 'MUBI', 'CANVA', 'DIRECTV', 'PLEX'];
+  // Líneas que no son nombre de app
+  var NOISE = ['VENCIDO', 'ACTIVO', 'VIGENTE', 'VENCE', 'RESTANTE', 'TARIFA', 'VENCIMIENTO', 'RENOVAR', 'LIBERAR', '⚠'];
 
   var $ = function (id) { return document.getElementById(id); };
-  var raw = $('raw'), out = $('out'), copyBtn = $('copy'), newpass = $('newpass');
-  var profile = null, mode = 'venta', timer = null;
+  var raw = $('raw'), newpass = $('newpass'), list = $('list'), copyAllBtn = $('copyAll');
+  var profile = null, mode = 'venta', current = [];
 
-  // Botones de perfil 1–7
+  // ---------- Botones de perfil ----------
   for (var n = 1; n <= 7; n++) {
     var b = document.createElement('button');
     b.type = 'button';
@@ -120,7 +128,11 @@ Aquí tienes el código actualizado. Cópialo entero y reemplaza todo el conteni
     b.textContent = n;
     b.setAttribute('aria-label', 'Perfil ' + n);
     b.dataset.n = n;
-    b.addEventListener('click', function () { profile = Number(this.dataset.n); update(); });
+    b.addEventListener('click', function () {
+      var v = Number(this.dataset.n);
+      profile = (profile === v) ? null : v;
+      update();
+    });
     $('profiles').appendChild(b);
   }
 
@@ -129,75 +141,108 @@ Aquí tienes el código actualizado. Cópialo entero y reemplaza todo el conteni
     $('mVenta').classList.toggle('on', m === 'venta');
     $('mRenov').classList.toggle('on', m === 'renov');
     $('renovBox').classList.toggle('show', m === 'renov');
-    if (m === 'renov') newpass.focus();
     update();
   }
   $('mVenta').addEventListener('click', function () { setMode('venta'); });
-  $('mRenov').addEventListener('click', function () { setMode('renov'); });
+  $('mRenov').addEventListener('click', function () { setMode('renov'); newpass.focus(); });
 
-  function parse(text) {
-    var lines = text.split(/\r?\n/)
-      .map(function (s) { return s.normalize('NFC').replace(/[\u00a0\u200b-\u200d\ufeff]/g, ' ').trim(); })
-      .filter(function (s) { return s && !/^[*•\-_.\s]+$/.test(s); });
-    var emailRe = /[^\s*]+@[^\s*]+\.[^\s*]+/;
-    var labeled = parseLabeled(lines, emailRe);
-    if (labeled) return labeled;
-    var idx = -1;
-    for (var i = 0; i < lines.length; i++) { if (emailRe.test(lines[i])) { idx = i; break; } }
-    var head = (idx >= 0 ? lines.slice(0, idx) : lines.slice(0, 1))
-      .map(function (s) { return s.replace(/\*/g, '').trim().toUpperCase(); });
-    var all = head.join(' ');
+  // ---------- Lectura del texto ----------
+  var emailRe = /[^\s*]+@[^\s*]+\.[^\s*]+/;
+  function clean(s) { return s.normalize('NFC').replace(/[\u00a0\u200b-\u200d\ufeff]/g, ' ').trim(); }
+  function key(s) { return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase(); }
+  function letters(s) { return key(s).replace(/[^A-Z]/g, ''); }
+  function isNoise(s) {
+    var k = key(s);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(k) || /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(k)) return true;
+    for (var i = 0; i < NOISE.length; i++) { if (k.indexOf(NOISE[i]) !== -1) return true; }
+    return false;
+  }
+
+  function describe(head) {
+    var h = head.filter(function (s) { return !isNoise(s); })
+      .map(function (s) { return s.replace(/\*/g, '').trim().toUpperCase(); })
+      .filter(Boolean);
+    var all = key(h.join(' '));
     var isTemporal = all.indexOf('TEMPORAL') !== -1;
+    var rest = h.filter(function (s) { return key(s) !== 'TEMPORAL'; });
     var app = '';
-    for (var j = 0; j < head.length; j++) { if (head[j] && head[j] !== 'TEMPORAL') { app = head[j]; break; } }
-    if (!app && isTemporal) app = 'TEMPORAL';
+    for (var i = 0; i < rest.length && !app; i++) {
+      for (var j = 0; j < PLATFORMS.length; j++) { if (key(rest[i]).indexOf(PLATFORMS[j]) !== -1) { app = rest[i]; break; } }
+    }
+    if (!app) app = rest[0] || (isTemporal ? 'TEMPORAL' : '');
+    var ka = key(app);
     return {
       app: app,
-      email: idx >= 0 ? lines[idx].match(emailRe)[0] : '',
-      pass: (idx >= 0 && lines[idx + 1]) ? lines[idx + 1].replace(/^\*+|\*+$/g, '').trim() : '',
       isTemporal: isTemporal,
-      isPrime: all.indexOf('PRIME') !== -1,
-      isNetflix: all.indexOf('NETFLIX') !== -1
+      isPrime: ka.indexOf('PRIME') !== -1 || ka.indexOf('AMAZON') !== -1 || all.indexOf('PRIME') !== -1,
+      isNetflix: ka.indexOf('NETFLIX') !== -1
     };
   }
 
-  // Formato con etiquetas (renovación): CORREO / USUARIO, CONTRASEÑA, PERFIL, PIN
-  function parseLabeled(lines, emailRe) {
-    function find(re) {
-      for (var i = 0; i < lines.length; i++) { var k = lines[i].normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase(); if (re(k, lines[i])) return i; }
-      return -1;
+  function parseAll(text) {
+    var lines = text.split(/\r?\n/).map(clean)
+      .filter(function (s) { return s && !/^[*•\-_.\s]+$/.test(s); });
+
+    var mailLabels = [], hasPassLabel = false;
+    lines.forEach(function (s, i) {
+      var k = key(s);
+      if (k.indexOf('CORREO') === 0 && !emailRe.test(s)) mailLabels.push(i);
+      if (letters(s) === 'CONTRASENA') hasPassLabel = true;
+    });
+
+    var recs = [];
+    if (mailLabels.length && hasPassLabel) {
+      // Formato con etiquetas (panel de renovación)
+      var prevEnd = 0;
+      mailLabels.forEach(function (start, r) {
+        var stop = r + 1 < mailLabels.length ? mailLabels[r + 1] : lines.length;
+        var find = function (test) {
+          for (var i = start; i < stop; i++) { if (test(lines[i])) return i; }
+          return -1;
+        };
+        var val = function (i) { return (i >= 0 && i + 1 < stop) ? lines[i + 1] : ''; };
+        var iPass = find(function (s) { return letters(s) === 'CONTRASENA'; });
+        var iPerf = find(function (s) { return letters(s) === 'PERFIL'; });
+        var iPin = find(function (s) { return key(s).indexOf('PIN') === 0 && !/\d/.test(s); });
+        var mailLine = val(start), m = mailLine.match(emailRe);
+        var perf = val(iPerf).match(/\d+/), pin = val(iPin).match(/\d+/);
+        var d = describe(lines.slice(prevEnd, start));
+        recs.push({
+          app: d.app, isTemporal: d.isTemporal, isPrime: d.isPrime, isNetflix: d.isNetflix,
+          email: m ? m[0] : mailLine,
+          pass: val(iPass),
+          profile: perf ? Number(perf[0]) : null,
+          pin: pin ? pin[0] : '',
+          labeled: true
+        });
+        prevEnd = Math.max(start, iPass, iPerf, iPin) + 2;
+      });
+      return recs;
     }
-    function next(i) { return (i >= 0 && lines[i + 1]) ? lines[i + 1] : ''; }
-    var iMail = find(function (k, s) { return k.indexOf('CORREO') === 0 && !emailRe.test(s); });
-    var iPass = find(function (k) { return k.replace(/[^A-Z]/g, '') === 'CONTRASENA'; });
-    if (iMail < 0 || iPass < 0) return null;
-    var iPerf = find(function (k) { return k.replace(/[^A-Z]/g, '') === 'PERFIL'; });
-    var iPin = find(function (k) { return k.indexOf('PIN') === 0 && !/\d/.test(k); });
-    var mailLine = next(iMail);
-    var m = mailLine.match(emailRe);
-    var perf = next(iPerf).match(/\d+/);
-    var pin = next(iPin).match(/\d+/);
-    var head = lines.slice(0, iMail).map(function (s) { return s.replace(/\*/g, '').trim().toUpperCase(); });
-    var all = head.join(' ');
-    return {
-      app: head[0] || '',
-      email: m ? m[0] : mailLine,
-      pass: next(iPass),
-      profile: perf ? Number(perf[0]) : null,
-      pin: pin ? pin[0] : '',
-      labeled: true,
-      isTemporal: all.indexOf('TEMPORAL') !== -1,
-      isPrime: all.indexOf('PRIME') !== -1,
-      isNetflix: all.indexOf('NETFLIX') !== -1
-    };
+
+    // Formato simple: APP ... correo / contraseña (una o varias cuentas seguidas)
+    var prev = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var m2 = lines[i].match(emailRe);
+      if (!m2) continue;
+      var passLine = (i + 1 < lines.length && !emailRe.test(lines[i + 1])) ? lines[i + 1].replace(/^\*+|\*+$/g, '').trim() : '';
+      var d2 = describe(lines.slice(prev, i));
+      recs.push({
+        app: d2.app, isTemporal: d2.isTemporal, isPrime: d2.isPrime, isNetflix: d2.isNetflix,
+        email: m2[0], pass: passLine, profile: null, pin: ''
+      });
+      prev = passLine ? i + 2 : i + 1;
+      if (passLine) i++;
+    }
+    return recs;
   }
 
-  function build(p, pass, profile) {
+  // ---------- Armado del mensaje ----------
+  function build(p, pass, prof) {
     var T = mode === 'renov' ? 'RENOVACIÓN MISMO PERFIL' : 'ACTIVACIÓN';
-    // PIN: XX11 normal, XX111 en Prime; si el texto trae PIN, se usa ese
-    var pin = profile ? String(profile) + String(profile) + (p.isPrime ? '111' : '11') : '';
-    if (p.pin && profile === p.profile) pin = p.pin;
-    var E = p.email || '[correo]', C = pass || '[contraseña]', P = profile || '[perfil]', N = pin || '[pin]';
+    var pin = prof ? String(prof) + String(prof) + (p.isPrime ? '111' : '11') : '';
+    if (p.pin && prof === p.profile) pin = p.pin;
+    var E = p.email || '[correo]', C = pass || '[contraseña]', P = prof || '[perfil]', N = pin || '[pin]';
     var txt;
     if (p.isTemporal) {
       txt =
@@ -228,72 +273,135 @@ Aquí tienes el código actualizado. Cópialo entero y reemplaza todo el conteni
         '🗓️ *VENCE:* 30 días';
       if (p.isNetflix) txt += '\n\n' + NETFLIX_AVISO;
     }
-    return { text: txt, pin: pin };
-  }
-
-  function update() {
-    var p = parse(raw.value);
-    var np = newpass.value.trim();
-    var useNew = mode === 'renov' && np;
-    var pass = useNew ? np : p.pass;
-    var prof = profile || p.profile || null;
-    var r = build(p, pass, prof);
-
-    out.value = r.text;
-    $('pin').textContent = r.pin || '—';
-    var kind = p.isTemporal ? 'Temporal (1 día)' : p.isPrime ? 'Prime Video' : p.isNetflix ? 'Netflix' : 'Normal';
-    $('iKind').textContent = kind + (mode === 'renov' ? ' · Renovación' : '');
-    $('iApp').textContent = p.app || '—';
-    $('iMail').textContent = p.email || '—';
-    $('iPass').textContent = pass ? pass + (useNew ? '  (nueva)' : '') : '—';
-
     var missing = [];
     if (!p.app) missing.push('app');
     if (!p.email) missing.push('correo');
     if (!pass) missing.push('contraseña');
     if (!prof) missing.push('perfil');
-    var st = $('status');
-    if (missing.length) { st.textContent = 'Falta: ' + missing.join(', '); st.style.color = '#F2B36B'; }
-    else { st.textContent = 'Listo'; st.style.color = '#5FD39A'; }
+    return { text: txt, missing: missing };
+  }
 
-    document.querySelectorAll('#profiles .pick').forEach(function (b) {
-      b.classList.toggle('on', Number(b.dataset.n) === prof);
+  // ---------- Pantalla ----------
+  function update() {
+    var recs = parseAll(raw.value);
+    var np = newpass.value.trim();
+    var single = recs.length === 1;
+
+    current = recs.map(function (p) {
+      var pass = (mode === 'renov' && np) ? np : p.pass;
+      // Cuenta con perfil propio (renovación): usa el suyo; si es una sola, el botón puede cambiarlo
+      var prof = p.profile ? (single && profile ? profile : p.profile) : profile;
+      var r = build(p, pass, prof);
+      r.rec = p;
+      return r;
     });
-    resetCopy();
+
+    list.innerHTML = '';
+    if (!current.length) {
+      var e = document.createElement('p');
+      e.className = 'empty';
+      e.textContent = 'Pega aquí el texto de una o varias cuentas.';
+      list.appendChild(e);
+    }
+    current.forEach(function (r, i) {
+      var box = document.createElement('div');
+      box.className = 'msg';
+      var top = document.createElement('div');
+      top.className = 'top';
+      var t = document.createElement('span');
+      t.innerHTML = '#' + (i + 1) + ' · <b></b>';
+      t.querySelector('b').textContent = (r.rec.isTemporal ? 'TEMPORAL · ' : '') + (r.rec.app || '—') + ' · ' + (r.rec.email || '—');
+      top.appendChild(t);
+      if (r.missing.length) {
+        var w = document.createElement('span');
+        w.className = 'warn';
+        w.textContent = 'Falta: ' + r.missing.join(', ');
+        top.appendChild(w);
+      }
+      var pre = document.createElement('pre');
+      pre.textContent = r.text;
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = 'Copiar este';
+      btn.addEventListener('click', function () { copyText(r.text, btn, 'Copiar este'); });
+      box.appendChild(top);
+      box.appendChild(pre);
+      if (current.length > 1) box.appendChild(btn);
+      list.appendChild(box);
+    });
+
+    var bad = current.filter(function (r) { return r.missing.length; }).length;
+    var st = $('status');
+    if (!current.length) { st.textContent = ''; }
+    else if (bad) { st.textContent = 'Revisar ' + bad + ' de ' + current.length; st.style.color = '#F2B36B'; }
+    else { st.textContent = current.length === 1 ? 'Listo' : current.length + ' listos'; st.style.color = '#5FD39A'; }
+
+    copyAllBtn.textContent = current.length > 1 ? 'Copiar todos (' + current.length + ')' : 'Copiar mensaje';
+    copyAllBtn.classList.remove('ok');
+    copyAllBtn.disabled = !current.length;
+
+    $('iCount').textContent = current.length;
+    $('iKind').textContent = mode === 'renov' ? 'Renovación' : 'Venta';
+    document.querySelectorAll('#profiles .pick').forEach(function (b) {
+      b.classList.toggle('on', Number(b.dataset.n) === profile);
+    });
   }
 
-  function resetCopy() { copyBtn.textContent = 'Copiar mensaje'; copyBtn.classList.remove('ok'); }
-  function copied() {
-    copyBtn.textContent = '¡Copiado!';
-    copyBtn.classList.add('ok');
-    clearTimeout(timer);
-    timer = setTimeout(resetCopy, 1800);
-  }
-  function fallbackCopy() {
-    out.focus(); out.select();
-    try { document.execCommand('copy'); } catch (e) {}
-    copied();
-  }
-
-  copyBtn.addEventListener('click', function () {
+  // ---------- Copiar ----------
+  function copyText(text, btn, label) {
+    var done = function () {
+      btn.textContent = '¡Copiado!';
+      btn.classList.add('ok');
+      clearTimeout(btn._t);
+      btn._t = setTimeout(function () { btn.textContent = label; btn.classList.remove('ok'); }, 1800);
+    };
+    var fallback = function () {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+      done();
+    };
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(out.value).then(copied, fallbackCopy);
-    } else { fallbackCopy(); }
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else { fallback(); }
+  }
+  copyAllBtn.addEventListener('click', function () {
+    if (!current.length) return;
+    var label = copyAllBtn.textContent;
+    copyText(current.map(function (r) { return r.text; }).join('\n\n'), copyAllBtn, label);
   });
 
   $('clear').addEventListener('click', function () {
     raw.value = ''; newpass.value = ''; profile = null; setMode('venta'); raw.focus();
   });
 
-  raw.addEventListener('input', function () {
-    // Si pegas el formato con etiquetas, pasa solo a Renovación y toma perfil/PIN del texto
-    if (/CORREO/i.test(raw.value) && /CONTRASE.{1,2}A/i.test(raw.value)) {
-      profile = null;
-      if (mode !== 'renov') { setMode('renov'); raw.focus(); return; }
-    }
+  // ---------- Pegado ----------
+  function onNewText() {
+    var looksLabeled = /CORREO/i.test(raw.value) && /CONTRASE.{1,2}A/i.test(raw.value);
+    if (looksLabeled && mode !== 'renov') { profile = null; setMode('renov'); return; }
     update();
-  });
+  }
+  raw.addEventListener('input', onNewText);
   newpass.addEventListener('input', update);
+
+  // Ctrl+V en cualquier parte de la página pega directo en "Texto de la cuenta"
+  document.addEventListener('paste', function (e) {
+    var t = e.target;
+    if (t === raw || t === newpass) return;
+    var data = (e.clipboardData || window.clipboardData);
+    var text = data ? data.getData('text') : '';
+    if (!text) return;
+    e.preventDefault();
+    raw.value = text;
+    raw.focus();
+    onNewText();
+  });
+
+  window.addEventListener('load', function () { raw.focus(); });
   update();
 })();
 </script>
