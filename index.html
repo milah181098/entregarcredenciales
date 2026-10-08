@@ -1,4 +1,4 @@
-Aquí está el código completo. Cópialo entero y reemplaza todo el contenido de tu index.html:
+Listo: **Copiar todos** ahora está arriba de los mensajes, es más grande y se queda fijo arriba mientras bajas por la lista. Así lo tienes siempre a mano aunque haya muchas cuentas. Aquí está el código completo para reemplazar tu index.html:
 
 ```html
 <!doctype html>
@@ -43,7 +43,7 @@ Aquí está el código completo. Cópialo entero y reemplaza todo el contenido d
   .ghost{align-self:flex-start;min-height:44px;padding:0 18px;border-radius:10px;border:1px solid #C9D3DE;background:#fff;color:#0E1B2C;font:600 14px Manrope,system-ui,sans-serif;cursor:pointer}
   .head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
   #status{font-size:13px;font-weight:600}
-  #copyAll{min-height:52px;border-radius:12px;border:none;background:#0B5CAD;color:#fff;font:800 16px Manrope,system-ui,sans-serif;cursor:pointer}
+  #copyAll{position:sticky;top:12px;z-index:5;min-height:68px;border-radius:14px;border:none;background:#0B5CAD;color:#fff;font:800 20px Manrope,system-ui,sans-serif;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.35)}
   #copyAll.ok,.msg button.ok{background:#16804F}
   #list{display:flex;flex-direction:column;gap:14px}
   .msg{border:1px solid #24364D;background:#13253B;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
@@ -100,8 +100,8 @@ Aquí está el código completo. Cópialo entero y reemplaza todo el contenido d
         <span class="lbl">4 · Mensajes listos</span>
         <span id="status"></span>
       </div>
-      <div id="list"></div>
       <button type="button" id="copyAll">Copiar mensaje</button>
+      <div id="list"></div>
     </section>
   </div>
 </div>
