@@ -1,4 +1,4 @@
-Aquí tienes el código completo. Cópialo entero y pégalo en tu index.html:
+Aquí tienes el código actualizado. Cópialo entero y reemplaza todo el contenido de tu index.html:
 
 ```html
 <!doctype html>
@@ -137,9 +137,11 @@ Aquí tienes el código completo. Cópialo entero y pégalo en tu index.html:
 
   function parse(text) {
     var lines = text.split(/\r?\n/)
-      .map(function (s) { return s.trim(); })
+      .map(function (s) { return s.normalize('NFC').replace(/[\u00a0\u200b-\u200d\ufeff]/g, ' ').trim(); })
       .filter(function (s) { return s && !/^[*•\-_.\s]+$/.test(s); });
     var emailRe = /[^\s*]+@[^\s*]+\.[^\s*]+/;
+    var labeled = parseLabeled(lines, emailRe);
+    if (labeled) return labeled;
     var idx = -1;
     for (var i = 0; i < lines.length; i++) { if (emailRe.test(lines[i])) { idx = i; break; } }
     var head = (idx >= 0 ? lines.slice(0, idx) : lines.slice(0, 1))
@@ -159,9 +161,42 @@ Aquí tienes el código completo. Cópialo entero y pégalo en tu index.html:
     };
   }
 
-  function build(p, pass) {
-    // PIN: XX11 normal, XX111 en Prime
+  // Formato con etiquetas (renovación): CORREO / USUARIO, CONTRASEÑA, PERFIL, PIN
+  function parseLabeled(lines, emailRe) {
+    function find(re) {
+      for (var i = 0; i < lines.length; i++) { var k = lines[i].normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase(); if (re(k, lines[i])) return i; }
+      return -1;
+    }
+    function next(i) { return (i >= 0 && lines[i + 1]) ? lines[i + 1] : ''; }
+    var iMail = find(function (k, s) { return k.indexOf('CORREO') === 0 && !emailRe.test(s); });
+    var iPass = find(function (k) { return k.replace(/[^A-Z]/g, '') === 'CONTRASENA'; });
+    if (iMail < 0 || iPass < 0) return null;
+    var iPerf = find(function (k) { return k.replace(/[^A-Z]/g, '') === 'PERFIL'; });
+    var iPin = find(function (k) { return k.indexOf('PIN') === 0 && !/\d/.test(k); });
+    var mailLine = next(iMail);
+    var m = mailLine.match(emailRe);
+    var perf = next(iPerf).match(/\d+/);
+    var pin = next(iPin).match(/\d+/);
+    var head = lines.slice(0, iMail).map(function (s) { return s.replace(/\*/g, '').trim().toUpperCase(); });
+    var all = head.join(' ');
+    return {
+      app: head[0] || '',
+      email: m ? m[0] : mailLine,
+      pass: next(iPass),
+      profile: perf ? Number(perf[0]) : null,
+      pin: pin ? pin[0] : '',
+      labeled: true,
+      isTemporal: all.indexOf('TEMPORAL') !== -1,
+      isPrime: all.indexOf('PRIME') !== -1,
+      isNetflix: all.indexOf('NETFLIX') !== -1
+    };
+  }
+
+  function build(p, pass, profile) {
+    var T = mode === 'renov' ? 'RENOVACIÓN MISMO PERFIL' : 'ACTIVACIÓN';
+    // PIN: XX11 normal, XX111 en Prime; si el texto trae PIN, se usa ese
     var pin = profile ? String(profile) + String(profile) + (p.isPrime ? '111' : '11') : '';
+    if (p.pin && profile === p.profile) pin = p.pin;
     var E = p.email || '[correo]', C = pass || '[contraseña]', P = profile || '[perfil]', N = pin || '[pin]';
     var txt;
     if (p.isTemporal) {
@@ -175,7 +210,7 @@ Aquí tienes el código completo. Cópialo entero y pégalo en tu index.html:
         'Duración: 1 DÍA';
     } else if (p.isPrime) {
       txt =
-        '✅ *ACTIVACIÓN PRIME* \n\n' +
+        '✅ *' + T + ' PRIME* \n\n' +
         '📧 *CORREO:*\n' + E + '\n' +
         '🔑 *CONTRASEÑA:*\n' + C + '\n' +
         '🖥 *PERFIL:* ' + P + '\n' +
@@ -185,7 +220,7 @@ Aquí tienes el código completo. Cópialo entero y pégalo en tu index.html:
         '⚠️ *IMPORTANTE:*\n' + PRIME_AVISO;
     } else {
       txt =
-        '✅ *ACTIVACIÓN ' + (p.app || '[APP]') + '* \n\n' +
+        '✅ *' + T + ' ' + (p.app || '[APP]') + '* \n\n' +
         '📧 *CORREO:*\n' + E + '\n' +
         '🔑 *CONTRASEÑA:*\n' + C + '\n' +
         '🖥 *PERFIL:* ' + P + '\n' +
@@ -201,7 +236,8 @@ Aquí tienes el código completo. Cópialo entero y pégalo en tu index.html:
     var np = newpass.value.trim();
     var useNew = mode === 'renov' && np;
     var pass = useNew ? np : p.pass;
-    var r = build(p, pass);
+    var prof = profile || p.profile || null;
+    var r = build(p, pass, prof);
 
     out.value = r.text;
     $('pin').textContent = r.pin || '—';
@@ -215,13 +251,13 @@ Aquí tienes el código completo. Cópialo entero y pégalo en tu index.html:
     if (!p.app) missing.push('app');
     if (!p.email) missing.push('correo');
     if (!pass) missing.push('contraseña');
-    if (!profile) missing.push('perfil');
+    if (!prof) missing.push('perfil');
     var st = $('status');
     if (missing.length) { st.textContent = 'Falta: ' + missing.join(', '); st.style.color = '#F2B36B'; }
     else { st.textContent = 'Listo'; st.style.color = '#5FD39A'; }
 
     document.querySelectorAll('#profiles .pick').forEach(function (b) {
-      b.classList.toggle('on', Number(b.dataset.n) === profile);
+      b.classList.toggle('on', Number(b.dataset.n) === prof);
     });
     resetCopy();
   }
@@ -249,7 +285,14 @@ Aquí tienes el código completo. Cópialo entero y pégalo en tu index.html:
     raw.value = ''; newpass.value = ''; profile = null; setMode('venta'); raw.focus();
   });
 
-  raw.addEventListener('input', update);
+  raw.addEventListener('input', function () {
+    // Si pegas el formato con etiquetas, pasa solo a Renovación y toma perfil/PIN del texto
+    if (/CORREO/i.test(raw.value) && /CONTRASE.{1,2}A/i.test(raw.value)) {
+      profile = null;
+      if (mode !== 'renov') { setMode('renov'); raw.focus(); return; }
+    }
+    update();
+  });
   newpass.addEventListener('input', update);
   update();
 })();
