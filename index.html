@@ -1,4 +1,6 @@
+El código empieza en `<!doctype html>` y termina en `</html>`; copia solo esa parte, sin esta frase:
 
+```html
 <!doctype html>
 <html lang="es">
 <head>
@@ -223,7 +225,7 @@
     for (var i = 0; i < lines.length; i++) {
       var m2 = lines[i].match(emailRe);
       if (!m2) continue;
-      var passLine = (i + 1 < lines.length && !emailRe.test(lines[i + 1])) ? lines[i + 1].replace(/^\*+|\*+$/g, '').trim() : '';
+      var passLine = (i + 1 < lines.length && !emailRe.test(lines[i + 1])) ? lines[i + 1] : '';
       var d2 = describe(lines.slice(prev, i));
       recs.push({
         app: d2.app, isTemporal: d2.isTemporal, isPrime: d2.isPrime, isNetflix: d2.isNetflix,
