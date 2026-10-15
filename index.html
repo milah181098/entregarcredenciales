@@ -1,6 +1,3 @@
-El código empieza en `<!doctype html>` y termina en `</html>`; copia solo esa parte, sin esta frase:
-
-```html
 <!doctype html>
 <html lang="es">
 <head>
@@ -32,7 +29,10 @@ El código empieza en `<!doctype html>` y termina en `</html>`; copia solo esa p
   .renov{display:none;flex-direction:column;gap:6px;padding:14px;border-radius:12px;background:#FFF6EA;border:1px solid #F1D3A8}
   .renov.show{display:flex}
   .renov label{font-size:13px;font-weight:600;color:#6B4A12}
-  .renov input{height:44px;width:100%;border-radius:10px;border:1px solid #E2C597;padding:0 12px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;color:#0E1B2C;background:#fff}
+  .chk{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:#6B4A12;cursor:pointer}
+  .chk input{width:20px;height:20px;accent-color:#0B5CAD;cursor:pointer}
+  .renov .sub{font-size:12px;color:#6B4A12;margin:0}
+  .renov input[type=text]{height:44px;width:100%;border-radius:10px;border:1px solid #E2C597;padding:0 12px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;color:#0E1B2C;background:#fff}
   .profiles{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
   .profiles .pick{height:52px;font-size:20px}
   .hint{font-size:13px;color:#4A5868;margin:0}
@@ -50,7 +50,9 @@ El código empieza en `<!doctype html>` y termina en `</html>`; copia solo esa p
   .msg .top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;color:#9FB0C3}
   .msg .top b{color:#E8EEF5}
   .msg .warn{color:#F2B36B;font-weight:600}
-  .msg pre{margin:0;white-space:pre-wrap;word-break:break-word;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;line-height:1.55;color:#E8EEF5}
+  .msg textarea{width:100%;margin:0;padding:6px;border:1px dashed transparent;border-radius:8px;background:transparent;resize:none;overflow:hidden;white-space:pre-wrap;word-break:break-word;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;line-height:1.55;color:#E8EEF5}
+  .msg textarea:hover{border-color:#2F4766}
+  .msg textarea:focus{border-color:#4B7BB5;outline:none;background:#0F1F33}
   .msg button{min-height:44px;border-radius:10px;border:none;background:#0B5CAD;color:#fff;font:800 14px Manrope,system-ui,sans-serif;cursor:pointer}
   .empty{color:#9FB0C3;font-size:14px;margin:0;padding:24px 0;text-align:center}
 </style>
@@ -76,8 +78,9 @@ El código empieza en `<!doctype html>` y termina en `</html>`; copia solo esa p
           <button type="button" class="pick" id="mRenov">Renovación</button>
         </div>
         <div class="renov" id="renovBox">
-          <label for="newpass">Contraseña del mes para todas (vacío = se mantiene la de cada cuenta)</label>
-          <input id="newpass" type="text" placeholder="Nueva contraseña">
+          <label class="chk"><input type="checkbox" id="useNew" checked> Nueva clave</label>
+          <input id="newpass" type="text" placeholder="Nueva contraseña" aria-label="Contraseña del mes">
+          <p class="sub" id="newHint">Marcado: todas las cuentas usan esta clave (HBO MAX lleva 2026 adicional). Desmarcado: cada cuenta mantiene su clave.</p>
         </div>
       </div>
 
@@ -111,13 +114,17 @@ El código empieza en `<!doctype html>` y termina en `</html>`; copia solo esa p
   var NETFLIX_AVISO = '`Si en unas semanas te sale aviso un aviso No formas parte del hogar, ingresar a esta web: https://sites.google.com/view/waveplayhogar`';
   var PRIME_AVISO = 'No comprar o alquilar películas que pone Prime Video en sección de alquiler porque es posible que se bloquee la cuenta por error de pago.';
   var PIN_CUENTA_PRIME = '11111';
+  // >>> CLAVE DEL MES (cambiar cada mes) <<<
+  var CLAVE_MES = 'paris2026';
+  var EXTRA_HBO = '2026'; // HBO MAX: clave del mes + este texto
   // Nombres de plataformas conocidas (para encontrar la app aunque haya otras líneas antes)
   var PLATFORMS = ['NETFLIX', 'DISNEY', 'PRIME', 'AMAZON', 'HBO', 'MAX', 'CRUNCHYROLL', 'SPOTIFY', 'YOUTUBE', 'PARAMOUNT', 'STAR', 'VIX', 'APPLE', 'UNIVERSAL', 'MUBI', 'CANVA', 'DIRECTV', 'PLEX'];
   // Líneas que no son nombre de app
   var NOISE = ['VENCIDO', 'ACTIVO', 'VIGENTE', 'VENCE', 'RESTANTE', 'TARIFA', 'VENCIMIENTO', 'RENOVAR', 'LIBERAR', '⚠'];
 
   var $ = function (id) { return document.getElementById(id); };
-  var raw = $('raw'), newpass = $('newpass'), list = $('list'), copyAllBtn = $('copyAll');
+  var raw = $('raw'), newpass = $('newpass'), useNewChk = $('useNew'), list = $('list'), copyAllBtn = $('copyAll');
+  newpass.value = CLAVE_MES;
   var profile = null, mode = 'venta', current = [];
 
   // ---------- Botones de perfil ----------
@@ -175,7 +182,8 @@ El código empieza en `<!doctype html>` y termina en `</html>`; copia solo esa p
       app: app,
       isTemporal: isTemporal,
       isPrime: ka.indexOf('PRIME') !== -1 || ka.indexOf('AMAZON') !== -1 || all.indexOf('PRIME') !== -1,
-      isNetflix: ka.indexOf('NETFLIX') !== -1
+      isNetflix: ka.indexOf('NETFLIX') !== -1,
+      isHbo: ka.indexOf('HBO') !== -1 || /(^|\s)MAX(\s|$)/.test(ka)
     };
   }
 
@@ -208,7 +216,7 @@ El código empieza en `<!doctype html>` y termina en `</html>`; copia solo esa p
         var perf = val(iPerf).match(/\d+/), pin = val(iPin).match(/\d+/);
         var d = describe(lines.slice(prevEnd, start));
         recs.push({
-          app: d.app, isTemporal: d.isTemporal, isPrime: d.isPrime, isNetflix: d.isNetflix,
+          app: d.app, isTemporal: d.isTemporal, isPrime: d.isPrime, isNetflix: d.isNetflix, isHbo: d.isHbo,
           email: m ? m[0] : mailLine,
           pass: val(iPass),
           profile: perf ? Number(perf[0]) : null,
@@ -228,7 +236,7 @@ El código empieza en `<!doctype html>` y termina en `</html>`; copia solo esa p
       var passLine = (i + 1 < lines.length && !emailRe.test(lines[i + 1])) ? lines[i + 1] : '';
       var d2 = describe(lines.slice(prev, i));
       recs.push({
-        app: d2.app, isTemporal: d2.isTemporal, isPrime: d2.isPrime, isNetflix: d2.isNetflix,
+        app: d2.app, isTemporal: d2.isTemporal, isPrime: d2.isPrime, isNetflix: d2.isNetflix, isHbo: d2.isHbo,
         email: m2[0], pass: passLine, profile: null, pin: ''
       });
       prev = passLine ? i + 2 : i + 1;
@@ -288,7 +296,8 @@ El código empieza en `<!doctype html>` y termina en `</html>`; copia solo esa p
     var single = recs.length === 1;
 
     current = recs.map(function (p) {
-      var pass = (mode === 'renov' && np) ? np : p.pass;
+      var applyNew = mode === 'renov' && useNewChk.checked && np;
+      var pass = applyNew ? (p.isHbo ? np + EXTRA_HBO : np) : p.pass;
       // Cuenta con perfil propio (renovación): usa el suyo; si es una sola, el botón puede cambiarlo
       var prof = p.profile ? (single && profile ? profile : p.profile) : profile;
       var r = build(p, pass, prof);
@@ -318,16 +327,21 @@ El código empieza en `<!doctype html>` y termina en `</html>`; copia solo esa p
         w.textContent = 'Falta: ' + r.missing.join(', ');
         top.appendChild(w);
       }
-      var pre = document.createElement('pre');
-      pre.textContent = r.text;
+      var ta = document.createElement('textarea');
+      ta.value = r.text;
+      ta.spellcheck = false;
+      ta.setAttribute('aria-label', 'Mensaje ' + (i + 1) + ' (editable)');
+      ta.addEventListener('input', function () { fit(ta); });
+      r.ta = ta;
       var btn = document.createElement('button');
       btn.type = 'button';
       btn.textContent = 'Copiar este';
-      btn.addEventListener('click', function () { copyText(r.text, btn, 'Copiar este'); });
+      btn.addEventListener('click', function () { copyText(ta.value, btn, 'Copiar este'); });
       box.appendChild(top);
-      box.appendChild(pre);
+      box.appendChild(ta);
       if (current.length > 1) box.appendChild(btn);
       list.appendChild(box);
+      fit(ta);
     });
 
     var bad = current.filter(function (r) { return r.missing.length; }).length;
@@ -346,6 +360,9 @@ El código empieza en `<!doctype html>` y termina en `</html>`; copia solo esa p
       b.classList.toggle('on', Number(b.dataset.n) === profile);
     });
   }
+
+  function fit(ta) { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; }
+  window.addEventListener('resize', function () { current.forEach(function (r) { if (r.ta) fit(r.ta); }); });
 
   // ---------- Copiar ----------
   function copyText(text, btn, label) {
@@ -372,11 +389,11 @@ El código empieza en `<!doctype html>` y termina en `</html>`; copia solo esa p
   copyAllBtn.addEventListener('click', function () {
     if (!current.length) return;
     var label = copyAllBtn.textContent;
-    copyText(current.map(function (r) { return r.text; }).join('\n\n'), copyAllBtn, label);
+    copyText(current.map(function (r) { return r.ta ? r.ta.value : r.text; }).join('\n\n'), copyAllBtn, label);
   });
 
   $('clear').addEventListener('click', function () {
-    raw.value = ''; newpass.value = ''; profile = null; setMode('venta'); raw.focus();
+    raw.value = ''; newpass.value = CLAVE_MES; useNewChk.checked = true; profile = null; setMode('venta'); raw.focus();
   });
 
   // ---------- Pegado ----------
@@ -387,11 +404,12 @@ El código empieza en `<!doctype html>` y termina en `</html>`; copia solo esa p
   }
   raw.addEventListener('input', onNewText);
   newpass.addEventListener('input', update);
+  useNewChk.addEventListener('change', function () { newpass.disabled = !useNewChk.checked; update(); });
 
   // Ctrl+V en cualquier parte de la página pega directo en "Texto de la cuenta"
   document.addEventListener('paste', function (e) {
     var t = e.target;
-    if (t === raw || t === newpass) return;
+    if (t === raw || t === newpass || (t && t.closest && t.closest('.msg'))) return;
     var data = (e.clipboardData || window.clipboardData);
     var text = data ? data.getData('text') : '';
     if (!text) return;
@@ -407,4 +425,3 @@ El código empieza en `<!doctype html>` y termina en `</html>`; copia solo esa p
 </script>
 </body>
 </html>
-```
