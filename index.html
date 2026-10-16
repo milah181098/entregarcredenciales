@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box}
+  [hidden]{display:none!important}
   body{margin:0;background:#EEF2F6;font-family:Manrope,system-ui,sans-serif;color:#0E1B2C}
   .wrap{max-width:1180px;margin:0 auto;padding:32px 16px;display:flex;flex-direction:column;gap:24px}
   header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px}
@@ -33,6 +34,10 @@
   .chk input{width:20px;height:20px;accent-color:#0B5CAD;cursor:pointer}
   .renov .sub{font-size:12px;color:#6B4A12;margin:0}
   .renov input[type=text]{height:44px;width:100%;border-radius:10px;border:1px solid #E2C597;padding:0 12px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;color:#0E1B2C;background:#fff}
+  .smodes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .smodes .pick{min-height:56px;font-size:15px;padding:6px 8px;line-height:1.2}
+  .smodes .pick.off.on{background:#B4232A;border-color:#B4232A}
+  .msg.script{border-style:dashed;border-color:#3D5A80}
   .profiles{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
   .profiles .pick{height:52px;font-size:20px}
   .hint{font-size:13px;color:#4A5868;margin:0}
@@ -87,7 +92,16 @@
       <div class="field">
         <span class="lbl">3 · Número de perfil</span>
         <div class="profiles" id="profiles"></div>
-        <p class="hint" id="profHint">En venta se aplica a todas las cuentas. En renovación cada cuenta usa su propio perfil y PIN.</p>
+        <p class="hint" id="profHint">Se aplica a las cuentas que no traen perfil en el texto. Si el texto ya trae número de perfil, se usa ese.</p>
+      </div>
+
+      <div class="field">
+        <span class="lbl">4 · Script del sistema (acceso a cuentas)</span>
+        <div class="smodes">
+          <button type="button" class="pick on" data-s="junto">Junto a las credenciales</button>
+          <button type="button" class="pick" data-s="aparte">Como bloque aparte</button>
+          <button type="button" class="pick off" data-s="quitar">Quitar script de credenciales</button>
+        </div>
       </div>
 
       <div class="info">
@@ -100,10 +114,15 @@
 
     <section class="card out">
       <div class="head">
-        <span class="lbl">4 · Mensajes listos</span>
+        <span class="lbl">5 · Mensajes listos</span>
         <span id="status"></span>
       </div>
       <button type="button" id="copyAll">Copiar mensaje</button>
+      <div class="msg script" id="scriptBox" hidden>
+        <div class="top"><span><b>Script del sistema</b> · bloque aparte</span></div>
+        <textarea id="scriptTa" spellcheck="false" aria-label="Script del sistema (editable)"></textarea>
+        <button type="button" id="copyScript">Copiar script</button>
+      </div>
       <div id="list"></div>
     </section>
   </div>
@@ -114,6 +133,12 @@
   var NETFLIX_AVISO = '`Si en unas semanas te sale aviso un aviso No formas parte del hogar, ingresar a esta web: https://sites.google.com/view/waveplayhogar`';
   var PRIME_AVISO = 'No comprar o alquilar películas que pone Prime Video en sección de alquiler porque es posible que se bloquee la cuenta por error de pago.';
   var PIN_CUENTA_PRIME = '11111';
+  // Script del sistema que va después de las credenciales
+  var SCRIPT_SISTEMA =
+    'Puede revisar sus cuentas adquiridas en este sistema: \n' +
+    'https://netfly-v4.vercel.app/login\n\n' +
+    '*NOMBRE DE USUARIO:* {{contactNumber}}\n' +
+    '*CONTRASEÑA:* 12345678';
   // >>> CLAVE DEL MES (cambiar cada mes) <<<
   var CLAVE_MES = 'paris2026';
   var EXTRA_HBO = '2026'; // HBO MAX: clave del mes + este texto
@@ -125,7 +150,21 @@
   var $ = function (id) { return document.getElementById(id); };
   var raw = $('raw'), newpass = $('newpass'), useNewChk = $('useNew'), list = $('list'), copyAllBtn = $('copyAll');
   newpass.value = CLAVE_MES;
-  var profile = null, mode = 'venta', current = [];
+  var profile = null, mode = 'venta', current = [], scriptMode = 'junto';
+  var scriptBox = $('scriptBox'), scriptTa = $('scriptTa');
+  scriptTa.value = SCRIPT_SISTEMA;
+  var SEP_SCRIPT = '\n\n' + SCRIPT_SISTEMA;
+
+  function setScriptMode(m) {
+    scriptMode = m;
+    document.querySelectorAll('.smodes .pick').forEach(function (b) { b.classList.toggle('on', b.dataset.s === m); });
+    update();
+  }
+  document.querySelectorAll('.smodes .pick').forEach(function (b) {
+    b.addEventListener('click', function () { setScriptMode(b.dataset.s); });
+  });
+  $('copyScript').addEventListener('click', function () { copyText(scriptTa.value, $('copyScript'), 'Copiar script'); });
+  scriptTa.addEventListener('input', function () { fit(scriptTa); });
 
   // ---------- Botones de perfil ----------
   for (var n = 1; n <= 7; n++) {
@@ -158,8 +197,14 @@
   function clean(s) { return s.normalize('NFC').replace(/[\u00a0\u200b-\u200d\ufeff]/g, ' ').trim(); }
   function key(s) { return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase(); }
   function letters(s) { return key(s).replace(/[^A-Z]/g, ''); }
+  // "PERFIL 3", "Perfil: 3", "PERFIL #3" -> 3
+  function profileOf(s) { var m = key(s).match(/^PERFIL\s*[:#\-]?\s*(\d{1,2})\b/); return m ? Number(m[1]) : null; }
+  // "PIN 3311", "PIN: 3311" -> "3311"
+  function pinOf(s) { var m = key(s).match(/^PIN\s*[:#\-]?\s*(\d{3,6})\s*$/); return m ? m[1] : ''; }
+  function isPlatformLine(s) { var k = key(s); for (var j = 0; j < PLATFORMS.length; j++) { if (k.indexOf(PLATFORMS[j]) !== -1) return true; } return k.indexOf('TEMPORAL') !== -1; }
   function isNoise(s) {
     var k = key(s);
+    if (profileOf(s) || pinOf(s)) return true;
     if (/^\d{4}-\d{2}-\d{2}$/.test(k) || /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(k)) return true;
     for (var i = 0; i < NOISE.length; i++) { if (k.indexOf(NOISE[i]) !== -1) return true; }
     return false;
@@ -229,15 +274,29 @@
     }
 
     // Formato simple: APP ... correo / contraseña (una o varias cuentas seguidas)
-    var prev = 0;
+    var prev = 0, used = {};
     for (var i = 0; i < lines.length; i++) {
       var m2 = lines[i].match(emailRe);
       if (!m2) continue;
       var passLine = (i + 1 < lines.length && !emailRe.test(lines[i + 1])) ? lines[i + 1] : '';
       var d2 = describe(lines.slice(prev, i));
+      var rProf = null, rPin = '';
+      // Perfil / PIN escritos en el texto: primero antes del correo...
+      for (var h = prev; h < i; h++) {
+        if (used[h]) continue;
+        if (!rProf && profileOf(lines[h])) { rProf = profileOf(lines[h]); used[h] = true; }
+        else if (!rPin && pinOf(lines[h])) { rPin = pinOf(lines[h]); used[h] = true; }
+      }
+      // ...y si no, justo después de la contraseña (hasta la siguiente app o correo)
+      for (var tIdx = passLine ? i + 2 : i + 1; tIdx < lines.length; tIdx++) {
+        var ln = lines[tIdx];
+        if (emailRe.test(ln) || isPlatformLine(ln)) break;
+        if (!rProf && profileOf(ln)) { rProf = profileOf(ln); used[tIdx] = true; }
+        else if (!rPin && pinOf(ln)) { rPin = pinOf(ln); used[tIdx] = true; }
+      }
       recs.push({
         app: d2.app, isTemporal: d2.isTemporal, isPrime: d2.isPrime, isNetflix: d2.isNetflix, isHbo: d2.isHbo,
-        email: m2[0], pass: passLine, profile: null, pin: ''
+        email: m2[0], pass: passLine, profile: rProf, pin: rProf ? rPin : ''
       });
       prev = passLine ? i + 2 : i + 1;
       if (passLine) i++;
@@ -293,13 +352,12 @@
   function update() {
     var recs = parseAll(raw.value);
     var np = newpass.value.trim();
-    var single = recs.length === 1;
 
     current = recs.map(function (p) {
       var applyNew = mode === 'renov' && useNewChk.checked && np;
       var pass = applyNew ? (p.isHbo ? np + EXTRA_HBO : np) : p.pass;
-      // Cuenta con perfil propio (renovación): usa el suyo; si es una sola, el botón puede cambiarlo
-      var prof = p.profile ? (single && profile ? profile : p.profile) : profile;
+      // Si el texto trae número de perfil, manda ese; si no, el botón marcado
+      var prof = p.profile || profile;
       var r = build(p, pass, prof);
       r.rec = p;
       return r;
@@ -328,7 +386,7 @@
         top.appendChild(w);
       }
       var ta = document.createElement('textarea');
-      ta.value = r.text;
+      ta.value = scriptMode === 'junto' ? r.text + SEP_SCRIPT : r.text;
       ta.spellcheck = false;
       ta.setAttribute('aria-label', 'Mensaje ' + (i + 1) + ' (editable)');
       ta.addEventListener('input', function () { fit(ta); });
@@ -343,6 +401,9 @@
       list.appendChild(box);
       fit(ta);
     });
+
+    scriptBox.hidden = !(scriptMode === 'aparte' && current.length);
+    if (!scriptBox.hidden) fit(scriptTa);
 
     var bad = current.filter(function (r) { return r.missing.length; }).length;
     var st = $('status');
@@ -389,11 +450,21 @@
   copyAllBtn.addEventListener('click', function () {
     if (!current.length) return;
     var label = copyAllBtn.textContent;
-    copyText(current.map(function (r) { return r.ta ? r.ta.value : r.text; }).join('\n\n'), copyAllBtn, label);
+    var vals = current.map(function (r) { return r.ta ? r.ta.value : r.text; });
+    var out;
+    if (scriptMode === 'junto' && vals.length > 1) {
+      // Varias cuentas: el script va una sola vez al final
+      out = vals.map(function (v) {
+        return v.slice(-SEP_SCRIPT.length) === SEP_SCRIPT ? v.slice(0, -SEP_SCRIPT.length) : v;
+      }).join('\n\n') + SEP_SCRIPT;
+    } else {
+      out = vals.join('\n\n');
+    }
+    copyText(out, copyAllBtn, label);
   });
 
   $('clear').addEventListener('click', function () {
-    raw.value = ''; newpass.value = CLAVE_MES; useNewChk.checked = true; profile = null; setMode('venta'); raw.focus();
+    raw.value = ''; newpass.value = CLAVE_MES; useNewChk.checked = true; profile = null; scriptTa.value = SCRIPT_SISTEMA; scriptMode = 'junto'; document.querySelectorAll('.smodes .pick').forEach(function (b) { b.classList.toggle('on', b.dataset.s === 'junto'); }); setMode('venta'); raw.focus();
   });
 
   // ---------- Pegado ----------
