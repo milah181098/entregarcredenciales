@@ -85,7 +85,7 @@
         <div class="renov" id="renovBox">
           <label class="chk"><input type="checkbox" id="useNew" checked> Nueva clave</label>
           <input id="newpass" type="text" placeholder="Nueva contraseña" aria-label="Contraseña del mes">
-          <p class="sub" id="newHint">Marcado: todas las cuentas usan esta clave (HBO MAX lleva 2026 adicional). Desmarcado: cada cuenta mantiene su clave.</p>
+          <p class="sub" id="newHint">Marcado: todas las cuentas usan esta clave (HBO MAX lleva 2026 adicional; Crunchyroll mantiene la suya). Desmarcado: cada cuenta mantiene su clave.</p>
         </div>
       </div>
 
@@ -228,7 +228,8 @@
       isTemporal: isTemporal,
       isPrime: ka.indexOf('PRIME') !== -1 || ka.indexOf('AMAZON') !== -1 || all.indexOf('PRIME') !== -1,
       isNetflix: ka.indexOf('NETFLIX') !== -1,
-      isHbo: ka.indexOf('HBO') !== -1 || /(^|\s)MAX(\s|$)/.test(ka)
+      isHbo: ka.indexOf('HBO') !== -1 || /(^|\s)MAX(\s|$)/.test(ka),
+      isCrunchy: ka.indexOf('CRUNCHY') !== -1
     };
   }
 
@@ -261,7 +262,7 @@
         var perf = val(iPerf).match(/\d+/), pin = val(iPin).match(/\d+/);
         var d = describe(lines.slice(prevEnd, start));
         recs.push({
-          app: d.app, isTemporal: d.isTemporal, isPrime: d.isPrime, isNetflix: d.isNetflix, isHbo: d.isHbo,
+          app: d.app, isTemporal: d.isTemporal, isPrime: d.isPrime, isNetflix: d.isNetflix, isHbo: d.isHbo, isCrunchy: d.isCrunchy,
           email: m ? m[0] : mailLine,
           pass: val(iPass),
           profile: perf ? Number(perf[0]) : null,
@@ -295,7 +296,7 @@
         else if (!rPin && pinOf(ln)) { rPin = pinOf(ln); used[tIdx] = true; }
       }
       recs.push({
-        app: d2.app, isTemporal: d2.isTemporal, isPrime: d2.isPrime, isNetflix: d2.isNetflix, isHbo: d2.isHbo,
+        app: d2.app, isTemporal: d2.isTemporal, isPrime: d2.isPrime, isNetflix: d2.isNetflix, isHbo: d2.isHbo, isCrunchy: d2.isCrunchy,
         email: m2[0], pass: passLine, profile: rProf, pin: rProf ? rPin : ''
       });
       prev = passLine ? i + 2 : i + 1;
@@ -354,7 +355,8 @@
     var np = newpass.value.trim();
 
     current = recs.map(function (p) {
-      var applyNew = mode === 'renov' && useNewChk.checked && np;
+      // Crunchyroll en renovación mantiene siempre su clave
+      var applyNew = mode === 'renov' && useNewChk.checked && np && !p.isCrunchy;
       var pass = applyNew ? (p.isHbo ? np + EXTRA_HBO : np) : p.pass;
       // Si el texto trae número de perfil, manda ese; si no, el botón marcado
       var prof = p.profile || profile;
