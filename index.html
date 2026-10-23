@@ -22,7 +22,7 @@
   .out .lbl{color:#9FB0C3}
   .field{display:flex;flex-direction:column;gap:8px}
   #raw{width:100%;height:240px;resize:vertical;border-radius:12px;padding:14px;border:1px solid #C9D3DE;color:#0E1B2C;background:#F8FAFC;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;line-height:1.5}
-  textarea:focus,input:focus,button:focus-visible{outline:2px solid #0B6FD6;outline-offset:1px}
+  textarea:focus,input:focus,button:focus-visible,summary:focus-visible{outline:2px solid #0B6FD6;outline-offset:1px}
   .pick{border-radius:12px;border:1px solid #D5DDE6;background:#F3F6F9;color:#0E1B2C;font-family:Manrope,system-ui,sans-serif;font-weight:800;cursor:pointer}
   .pick.on{background:#0B5CAD;border-color:#0B5CAD;color:#fff}
   .modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
@@ -31,17 +31,29 @@
   .renov.show{display:flex}
   .renov label{font-size:13px;font-weight:600;color:#6B4A12}
   .chk{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:#6B4A12;cursor:pointer}
-  .chk input{width:20px;height:20px;accent-color:#0B5CAD;cursor:pointer}
+  .chk input{width:20px;height:20px;accent-color:#0B5CAD;cursor:pointer;flex:none}
   .renov .sub{font-size:12px;color:#6B4A12;margin:0}
   .renov input[type=text]{height:44px;width:100%;border-radius:10px;border:1px solid #E2C597;padding:0 12px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;color:#0E1B2C;background:#fff}
+  .gift{padding:14px;border-radius:12px;background:#F3EEFF;border:1px solid #D6C8F5}
+  .gift .lbl{color:#4B2E83}
+  .gplats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .gplats .pick{min-height:46px;font-size:14px;padding:4px 6px}
+  .gplats .pick.on{background:#5B3AA8;border-color:#5B3AA8}
   .smodes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
   .smodes .pick{min-height:56px;font-size:15px;padding:6px 8px;line-height:1.2}
   .smodes .pick.off.on{background:#B4232A;border-color:#B4232A}
-  .msg.script{border-style:dashed;border-color:#3D5A80}
   .profiles{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
   .profiles .pick{height:52px;font-size:20px}
+  details.per{border:1px solid #D5DDE6;border-radius:12px;background:#F8FAFC}
+  .renov details.per{border-color:#E2C597;background:#FFFBF4}
+  details.per summary{cursor:pointer;padding:10px 12px;font-size:14px;font-weight:700;list-style-position:inside}
+  .perlist{display:flex;flex-direction:column;padding:0 12px 6px}
+  .acc{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 0;border-top:1px solid #E3E8EE}
+  .acc .nm{flex:1 1 170px;min-width:0;font-size:13px;overflow-wrap:anywhere}
+  .acc .nm small{color:#4A5868;font-weight:600}
+  .mini{display:grid;grid-template-columns:repeat(7,40px);gap:4px}
+  .mini .pick{height:40px;font-size:15px;border-radius:8px}
   .hint{font-size:13px;color:#4A5868;margin:0}
-  .mono{font-family:'JetBrains Mono',ui-monospace,monospace}
   .info{display:flex;flex-direction:column;gap:6px;font-size:14px}
   .info div{display:flex;gap:8px}
   .info span{color:#4A5868;min-width:96px}
@@ -52,6 +64,7 @@
   #copyAll.ok,.msg button.ok{background:#16804F}
   #list{display:flex;flex-direction:column;gap:14px}
   .msg{border:1px solid #24364D;background:#13253B;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+  .msg.script{border-style:dashed;border-color:#3D5A80}
   .msg .top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;color:#9FB0C3}
   .msg .top b{color:#E8EEF5}
   .msg .warn{color:#F2B36B;font-weight:600}
@@ -83,16 +96,29 @@
           <button type="button" class="pick" id="mRenov">Renovación</button>
         </div>
         <div class="renov" id="renovBox">
-          <label class="chk"><input type="checkbox" id="useNew" checked> Nueva clave</label>
+          <label class="chk"><input type="checkbox" id="useNew" checked> Nueva clave (todas las cuentas)</label>
           <input id="newpass" type="text" placeholder="Nueva contraseña" aria-label="Contraseña del mes">
-          <p class="sub" id="newHint">Marcado: todas las cuentas usan esta clave (HBO MAX lleva 2026 adicional; Crunchyroll mantiene la suya). Desmarcado: cada cuenta mantiene su clave.</p>
+          <p class="sub">Marcado: las cuentas usan esta clave (HBO MAX lleva 2026 adicional; Crunchyroll mantiene la suya). Desmarcado: cada cuenta mantiene su clave.</p>
+          <details class="per" id="perPass" hidden>
+            <summary>Nueva clave por cuenta</summary>
+            <div class="perlist" id="perPassList"></div>
+          </details>
         </div>
       </div>
 
+      <div class="field gift" id="giftField" hidden>
+        <span class="lbl">Regalo · ¿de qué plataforma es?</span>
+        <div class="gplats" id="giftPlats"></div>
+      </div>
+
       <div class="field">
-        <span class="lbl">3 · Número de perfil</span>
+        <span class="lbl">3 · Número de perfil (todas las cuentas)</span>
         <div class="profiles" id="profiles"></div>
-        <p class="hint" id="profHint">Se aplica a las cuentas que no traen perfil en el texto. Si el texto ya trae número de perfil, se usa ese.</p>
+        <p class="hint">Si el texto ya trae número de perfil, se usa ese. Puedes cambiarlo por cuenta abajo.</p>
+        <details class="per" id="perProf" open hidden>
+          <summary>Perfil por cuenta</summary>
+          <div class="perlist" id="perProfList"></div>
+        </details>
       </div>
 
       <div class="field">
@@ -130,9 +156,12 @@
 
 <script>
 (function () {
+  // ================== TEXTOS FIJOS ==================
   var NETFLIX_AVISO = '`Si en unas semanas te sale aviso un aviso No formas parte del hogar, ingresar a esta web: https://sites.google.com/view/waveplayhogar`';
   var PRIME_AVISO = 'No comprar o alquilar películas que pone Prime Video en sección de alquiler porque es posible que se bloquee la cuenta por error de pago.';
   var PIN_CUENTA_PRIME = '11111';
+  var REGALO_TITULO = 'ACTIVACIÓN DE TU REGALO POR 1 MES';
+  var REGALO_MENSAJE = 'Lamentamos las molestias durante el mes del servicio, esperamos que esta recompensa te sea útil.';
   // Script del sistema que va después de las credenciales
   var SCRIPT_SISTEMA =
     'Puede revisar sus cuentas adquiridas en este sistema: \n' +
@@ -142,57 +171,35 @@
   // >>> CLAVE DEL MES (cambiar cada mes) <<<
   var CLAVE_MES = 'paris2026';
   var EXTRA_HBO = '2026'; // HBO MAX: clave del mes + este texto
+  // Plataformas que se pueden elegir para un regalo
+  var GIFT_PLATS = [
+    { id: 'VIX', label: 'ViX', name: 'VIX' },
+    { id: 'PARAMOUNT', label: 'Paramount+', name: 'PARAMOUNT+' },
+    { id: 'PRIME', label: 'Prime Video', name: 'PRIME VIDEO' },
+    { id: 'DISNEY', label: 'Disney Estándar', name: 'DISNEY ESTÁNDAR' },
+    { id: 'NETFLIX', label: 'Netflix', name: 'NETFLIX' },
+    { id: 'HBO', label: 'HBO Max', name: 'HBO MAX' }
+  ];
   // Nombres de plataformas conocidas (para encontrar la app aunque haya otras líneas antes)
   var PLATFORMS = ['NETFLIX', 'DISNEY', 'PRIME', 'AMAZON', 'HBO', 'MAX', 'CRUNCHYROLL', 'SPOTIFY', 'YOUTUBE', 'PARAMOUNT', 'STAR', 'VIX', 'APPLE', 'UNIVERSAL', 'MUBI', 'CANVA', 'DIRECTV', 'PLEX'];
   // Líneas que no son nombre de app
   var NOISE = ['VENCIDO', 'ACTIVO', 'VIGENTE', 'VENCE', 'RESTANTE', 'TARIFA', 'VENCIMIENTO', 'RENOVAR', 'LIBERAR', '⚠'];
 
+  // ================== ESTADO ==================
   var $ = function (id) { return document.getElementById(id); };
   var raw = $('raw'), newpass = $('newpass'), useNewChk = $('useNew'), list = $('list'), copyAllBtn = $('copyAll');
-  newpass.value = CLAVE_MES;
-  var profile = null, mode = 'venta', current = [], scriptMode = 'junto';
   var scriptBox = $('scriptBox'), scriptTa = $('scriptTa');
+  newpass.value = CLAVE_MES;
   scriptTa.value = SCRIPT_SISTEMA;
   var SEP_SCRIPT = '\n\n' + SCRIPT_SISTEMA;
 
-  function setScriptMode(m) {
-    scriptMode = m;
-    document.querySelectorAll('.smodes .pick').forEach(function (b) { b.classList.toggle('on', b.dataset.s === m); });
-    update();
-  }
-  document.querySelectorAll('.smodes .pick').forEach(function (b) {
-    b.addEventListener('click', function () { setScriptMode(b.dataset.s); });
-  });
-  $('copyScript').addEventListener('click', function () { copyText(scriptTa.value, $('copyScript'), 'Copiar script'); });
-  scriptTa.addEventListener('input', function () { fit(scriptTa); });
+  var profile = null;      // perfil general (todas las cuentas)
+  var profOv = {};         // perfil elegido a mano por cuenta (índice -> número)
+  var passOv = {};         // nueva clave por cuenta (índice -> true/false)
+  var giftPlat = null;     // plataforma del regalo elegida
+  var mode = 'venta', scriptMode = 'junto', current = [];
 
-  // ---------- Botones de perfil ----------
-  for (var n = 1; n <= 7; n++) {
-    var b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'pick';
-    b.textContent = n;
-    b.setAttribute('aria-label', 'Perfil ' + n);
-    b.dataset.n = n;
-    b.addEventListener('click', function () {
-      var v = Number(this.dataset.n);
-      profile = (profile === v) ? null : v;
-      update();
-    });
-    $('profiles').appendChild(b);
-  }
-
-  function setMode(m) {
-    mode = m;
-    $('mVenta').classList.toggle('on', m === 'venta');
-    $('mRenov').classList.toggle('on', m === 'renov');
-    $('renovBox').classList.toggle('show', m === 'renov');
-    update();
-  }
-  $('mVenta').addEventListener('click', function () { setMode('venta'); });
-  $('mRenov').addEventListener('click', function () { setMode('renov'); newpass.focus(); });
-
-  // ---------- Lectura del texto ----------
+  // ================== UTILIDADES DE TEXTO ==================
   var emailRe = /[^\s*]+@[^\s*]+\.[^\s*]+/;
   function clean(s) { return s.normalize('NFC').replace(/[\u00a0\u200b-\u200d\ufeff]/g, ' ').trim(); }
   function key(s) { return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase(); }
@@ -201,35 +208,49 @@
   function profileOf(s) { var m = key(s).match(/^PERFIL\s*[:#\-]?\s*(\d{1,2})\b/); return m ? Number(m[1]) : null; }
   // "PIN 3311", "PIN: 3311" -> "3311"
   function pinOf(s) { var m = key(s).match(/^PIN\s*[:#\-]?\s*(\d{3,6})\s*$/); return m ? m[1] : ''; }
-  function isPlatformLine(s) { var k = key(s); for (var j = 0; j < PLATFORMS.length; j++) { if (k.indexOf(PLATFORMS[j]) !== -1) return true; } return k.indexOf('TEMPORAL') !== -1; }
+  function hasPlatform(k) { for (var j = 0; j < PLATFORMS.length; j++) { if (k.indexOf(PLATFORMS[j]) !== -1) return true; } return false; }
+  function isPlatformLine(s) { var k = key(s); return hasPlatform(k) || k.indexOf('TEMPORAL') !== -1 || k.indexOf('REGALO') !== -1; }
   function isNoise(s) {
     var k = key(s);
     if (profileOf(s) || pinOf(s)) return true;
     if (/^\d{4}-\d{2}-\d{2}$/.test(k) || /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(k)) return true;
+    if ((k.indexOf('COMPLETA') !== -1 || k.indexOf('REGALO') !== -1) && !hasPlatform(k)) return true;
     for (var i = 0; i < NOISE.length; i++) { if (k.indexOf(NOISE[i]) !== -1) return true; }
     return false;
   }
+  function giftIdFromKey(k) {
+    if (k.indexOf('VIX') !== -1) return 'VIX';
+    if (k.indexOf('PARAMOUNT') !== -1) return 'PARAMOUNT';
+    if (k.indexOf('PRIME') !== -1 || k.indexOf('AMAZON') !== -1) return 'PRIME';
+    if (k.indexOf('DISNEY') !== -1) return 'DISNEY';
+    if (k.indexOf('NETFLIX') !== -1) return 'NETFLIX';
+    if (k.indexOf('HBO') !== -1 || /(^|\s)MAX(\s|$)/.test(k)) return 'HBO';
+    return null;
+  }
 
+  // Lee las líneas de encabezado de una cuenta y saca la app y sus características
   function describe(head) {
+    var allRaw = key(head.join(' '));
     var h = head.filter(function (s) { return !isNoise(s); })
       .map(function (s) { return s.replace(/\*/g, '').trim().toUpperCase(); })
       .filter(Boolean);
-    var all = key(h.join(' '));
-    var isTemporal = all.indexOf('TEMPORAL') !== -1;
+    var isTemporal = allRaw.indexOf('TEMPORAL') !== -1;
     var rest = h.filter(function (s) { return key(s) !== 'TEMPORAL'; });
     var app = '';
-    for (var i = 0; i < rest.length && !app; i++) {
-      for (var j = 0; j < PLATFORMS.length; j++) { if (key(rest[i]).indexOf(PLATFORMS[j]) !== -1) { app = rest[i]; break; } }
-    }
+    for (var i = 0; i < rest.length && !app; i++) { if (hasPlatform(key(rest[i]))) app = rest[i]; }
     if (!app) app = rest[0] || (isTemporal ? 'TEMPORAL' : '');
+    app = app.replace(/CUENTA\s+COMPLETA|COMPLETA|REGALO/g, '').replace(/\s{2,}/g, ' ').replace(/^[\s\-·:]+|[\s\-·:]+$/g, '');
     var ka = key(app);
     return {
       app: app,
       isTemporal: isTemporal,
-      isPrime: ka.indexOf('PRIME') !== -1 || ka.indexOf('AMAZON') !== -1 || all.indexOf('PRIME') !== -1,
+      isComplete: allRaw.indexOf('COMPLETA') !== -1,
+      isGift: allRaw.indexOf('REGALO') !== -1,
+      isPrime: ka.indexOf('PRIME') !== -1 || ka.indexOf('AMAZON') !== -1 || (isTemporal && allRaw.indexOf('PRIME') !== -1),
       isNetflix: ka.indexOf('NETFLIX') !== -1,
       isHbo: ka.indexOf('HBO') !== -1 || /(^|\s)MAX(\s|$)/.test(ka),
-      isCrunchy: ka.indexOf('CRUNCHY') !== -1
+      isCrunchy: ka.indexOf('CRUNCHY') !== -1,
+      noPin: ka.indexOf('VIX') !== -1 || ka.indexOf('PARAMOUNT') !== -1
     };
   }
 
@@ -239,8 +260,7 @@
 
     var mailLabels = [], hasPassLabel = false;
     lines.forEach(function (s, i) {
-      var k = key(s);
-      if (k.indexOf('CORREO') === 0 && !emailRe.test(s)) mailLabels.push(i);
+      if (key(s).indexOf('CORREO') === 0 && !emailRe.test(s)) mailLabels.push(i);
       if (letters(s) === 'CONTRASENA') hasPassLabel = true;
     });
 
@@ -261,14 +281,11 @@
         var mailLine = val(start), m = mailLine.match(emailRe);
         var perf = val(iPerf).match(/\d+/), pin = val(iPin).match(/\d+/);
         var d = describe(lines.slice(prevEnd, start));
-        recs.push({
-          app: d.app, isTemporal: d.isTemporal, isPrime: d.isPrime, isNetflix: d.isNetflix, isHbo: d.isHbo, isCrunchy: d.isCrunchy,
-          email: m ? m[0] : mailLine,
-          pass: val(iPass),
-          profile: perf ? Number(perf[0]) : null,
-          pin: pin ? pin[0] : '',
-          labeled: true
-        });
+        d.email = m ? m[0] : mailLine;
+        d.pass = val(iPass);
+        d.profile = perf ? Number(perf[0]) : null;
+        d.pin = pin ? pin[0] : '';
+        recs.push(d);
         prevEnd = Math.max(start, iPass, iPerf, iPin) + 2;
       });
       return recs;
@@ -289,82 +306,138 @@
         else if (!rPin && pinOf(lines[h])) { rPin = pinOf(lines[h]); used[h] = true; }
       }
       // ...y si no, justo después de la contraseña (hasta la siguiente app o correo)
-      for (var tIdx = passLine ? i + 2 : i + 1; tIdx < lines.length; tIdx++) {
-        var ln = lines[tIdx];
-        if (emailRe.test(ln) || isPlatformLine(ln)) break;
-        if (!rProf && profileOf(ln)) { rProf = profileOf(ln); used[tIdx] = true; }
-        else if (!rPin && pinOf(ln)) { rPin = pinOf(ln); used[tIdx] = true; }
+      for (var t = passLine ? i + 2 : i + 1; t < lines.length; t++) {
+        var ln = lines[t];
+        if (emailRe.test(ln) || isPlatformLine(ln) || key(ln).indexOf('COMPLETA') !== -1) break;
+        if (!rProf && profileOf(ln)) { rProf = profileOf(ln); used[t] = true; }
+        else if (!rPin && pinOf(ln)) { rPin = pinOf(ln); used[t] = true; }
       }
-      recs.push({
-        app: d2.app, isTemporal: d2.isTemporal, isPrime: d2.isPrime, isNetflix: d2.isNetflix, isHbo: d2.isHbo, isCrunchy: d2.isCrunchy,
-        email: m2[0], pass: passLine, profile: rProf, pin: rProf ? rPin : ''
-      });
+      d2.email = m2[0];
+      d2.pass = passLine;
+      d2.profile = rProf;
+      d2.pin = rProf ? rPin : '';
+      recs.push(d2);
       prev = passLine ? i + 2 : i + 1;
       if (passLine) i++;
     }
     return recs;
   }
 
-  // ---------- Armado del mensaje ----------
+  // Para regalos: la plataforma elegida define nombre, PIN, avisos
+  function giftInfo(p) {
+    var id = giftPlat || giftIdFromKey(key(p.app));
+    var gp = null;
+    GIFT_PLATS.forEach(function (g) { if (g.id === id) gp = g; });
+    return gp;
+  }
+
+  // ================== ARMADO DEL MENSAJE ==================
   function build(p, pass, prof) {
-    var T = mode === 'renov' ? 'RENOVACIÓN MISMO PERFIL' : 'ACTIVACIÓN';
-    var pin = prof ? String(prof) + String(prof) + (p.isPrime ? '111' : '11') : '';
+    var gift = p.isGift ? giftInfo(p) : null;
+    var isPrime = gift ? gift.id === 'PRIME' : p.isPrime;
+    var isNetflix = gift ? gift.id === 'NETFLIX' : p.isNetflix;
+    var noPin = gift ? (gift.id === 'VIX' || gift.id === 'PARAMOUNT') : p.noPin;
+    var complete = p.isComplete;
+
+    var pin = prof ? String(prof) + String(prof) + (isPrime ? '111' : '11') : '';
     if (p.pin && prof === p.profile) pin = p.pin;
     var E = p.email || '[correo]', C = pass || '[contraseña]', P = prof || '[perfil]', N = pin || '[pin]';
     var txt;
-    if (p.isTemporal) {
-      txt =
-        'Revisaremos el error y le informaremos cuando esté solucionado. Si no es posible reactivar la misma cuenta, le daremos un reemplazo.\n' +
-        'Por ahora, le daremos un reemplazo temporal para que acceda hasta solucionar el inconveniente.\n' +
-        'Correo: ' + E + '\n' +
-        'Contraseña: ' + C + '\n' +
-        'Perfil: ' + P + '\n' +
-        'PIN: ' + N + '\n' +
-        'Duración: 1 DÍA';
-    } else if (p.isPrime) {
-      txt =
-        '✅ *' + T + ' PRIME* \n\n' +
-        '📧 *CORREO:*\n' + E + '\n' +
-        '🔑 *CONTRASEÑA:*\n' + C + '\n' +
-        '🖥 *PERFIL:* ' + P + '\n' +
-        '🔐 *PIN PERFIL:* ' + N + '\n' +
-        '🔐 *PIN CUENTA:* ' + PIN_CUENTA_PRIME + '\n' +
-        '🗓️ *VENCE:* 30 días\n\n' +
-        '⚠️ *IMPORTANTE:*\n' + PRIME_AVISO;
+
+    if (p.isTemporal && !p.isGift) {
+      var tl = [
+        'Revisaremos el error y le informaremos cuando esté solucionado. Si no es posible reactivar la misma cuenta, le daremos un reemplazo.',
+        'Por ahora, le daremos un reemplazo temporal para que acceda hasta solucionar el inconveniente.',
+        'Correo: ' + E,
+        'Contraseña: ' + C
+      ];
+      if (!complete) { tl.push('Perfil: ' + P); if (!noPin) tl.push('PIN: ' + N); }
+      tl.push('Duración: 1 DÍA');
+      txt = tl.join('\n');
     } else {
-      txt =
-        '✅ *' + T + ' ' + (p.app || '[APP]') + '* \n\n' +
-        '📧 *CORREO:*\n' + E + '\n' +
-        '🔑 *CONTRASEÑA:*\n' + C + '\n' +
-        '🖥 *PERFIL:* ' + P + '\n' +
-        '🔐 *PIN:* ' + N + '\n' +
-        '🗓️ *VENCE:* 30 días';
-      if (p.isNetflix) txt += '\n\n' + NETFLIX_AVISO;
+      var title;
+      if (p.isGift) {
+        title = REGALO_TITULO;
+      } else {
+        var base = mode === 'renov' ? 'RENOVACIÓN' : 'ACTIVACIÓN';
+        var appName = isPrime ? 'PRIME' : (p.app || '[APP]');
+        title = complete ? base + ' CUENTA COMPLETA ' + appName
+                         : (mode === 'renov' ? 'RENOVACIÓN MISMO PERFIL' : 'ACTIVACIÓN') + ' ' + appName;
+      }
+      var L = ['✅ *' + title + '* ', ''];
+      if (p.isGift) L.push('🎁 *PLATAFORMA:* ' + (gift ? gift.name : '[elige la plataforma]'));
+      L.push('📧 *CORREO:*', E, '🔑 *CONTRASEÑA:*', C);
+      if (!complete) {
+        L.push('🖥 *PERFIL:* ' + P);
+        if (!noPin) L.push(isPrime ? '🔐 *PIN PERFIL:* ' + N : '🔐 *PIN:* ' + N);
+      }
+      if (isPrime) L.push('🔐 *PIN CUENTA:* ' + PIN_CUENTA_PRIME);
+      L.push('🗓️ *VENCE:* 30 días');
+      txt = L.join('\n');
+      if (isPrime) txt += '\n\n⚠️ *IMPORTANTE:*\n' + PRIME_AVISO;
+      if (isNetflix) txt += '\n\n' + NETFLIX_AVISO;
+      if (p.isGift) txt += '\n\n' + REGALO_MENSAJE;
     }
+
     var missing = [];
-    if (!p.app) missing.push('app');
+    if (!p.app && !p.isGift) missing.push('app');
+    if (p.isGift && !gift) missing.push('plataforma del regalo');
     if (!p.email) missing.push('correo');
     if (!pass) missing.push('contraseña');
-    if (!prof) missing.push('perfil');
+    if (!prof && !complete) missing.push('perfil');
     return { text: txt, missing: missing };
   }
 
-  // ---------- Pantalla ----------
+  function accName(p) {
+    var g = p.isGift ? giftInfo(p) : null;
+    return (p.isGift ? 'REGALO' + (g ? ' ' + g.name : '') : (p.app || '—')) + (p.isComplete ? ' (completa)' : '');
+  }
+  function defaultApply(p) { return useNewChk.checked && !p.isCrunchy; }
+
+  // ================== PANTALLA ==================
   function update() {
     var recs = parseAll(raw.value);
     var np = newpass.value.trim();
 
-    current = recs.map(function (p) {
-      // Crunchyroll en renovación mantiene siempre su clave
-      var applyNew = mode === 'renov' && useNewChk.checked && np && !p.isCrunchy;
-      var pass = applyNew ? (p.isHbo ? np + EXTRA_HBO : np) : p.pass;
-      // Si el texto trae número de perfil, manda ese; si no, el botón marcado
-      var prof = p.profile || profile;
+    current = recs.map(function (p, i) {
+      var apply = (i in passOv) ? passOv[i] : defaultApply(p);
+      var applyNew = mode === 'renov' && np && apply;
+      var g = p.isGift ? giftInfo(p) : null;
+      var hbo = g ? g.id === 'HBO' : p.isHbo;
+      var pass = applyNew ? (hbo ? np + EXTRA_HBO : np) : p.pass;
+      // Prioridad del perfil: elegido por cuenta > el que trae el texto > el general
+      var src = profOv[i] ? 'cuenta' : (p.profile ? 'texto' : (profile ? 'general' : ''));
+      var prof = p.isComplete ? null : (profOv[i] || p.profile || profile);
       var r = build(p, pass, prof);
-      r.rec = p;
+      r.rec = p; r.prof = prof; r.src = src; r.apply = !!apply; r.newApplied = !!applyNew;
       return r;
     });
 
+    renderMessages();
+    renderPerAccount();
+    renderGift();
+
+    scriptBox.hidden = !(scriptMode === 'aparte' && current.length);
+    if (!scriptBox.hidden) fit(scriptTa);
+
+    var bad = current.filter(function (r) { return r.missing.length; }).length;
+    var st = $('status');
+    if (!current.length) { st.textContent = ''; }
+    else if (bad) { st.textContent = 'Revisar ' + bad + ' de ' + current.length; st.style.color = '#F2B36B'; }
+    else { st.textContent = current.length === 1 ? 'Listo' : current.length + ' listos'; st.style.color = '#5FD39A'; }
+
+    copyAllBtn.textContent = current.length > 1 ? 'Copiar todos (' + current.length + ')' : 'Copiar mensaje';
+    copyAllBtn.classList.remove('ok');
+    copyAllBtn.disabled = !current.length;
+
+    $('iCount').textContent = current.length;
+    $('iKind').textContent = mode === 'renov' ? 'Renovación' : 'Venta';
+    document.querySelectorAll('#profiles .pick').forEach(function (b) {
+      b.classList.toggle('on', Number(b.dataset.n) === profile);
+    });
+  }
+
+  function renderMessages() {
     list.innerHTML = '';
     if (!current.length) {
       var e = document.createElement('p');
@@ -379,7 +452,7 @@
       top.className = 'top';
       var t = document.createElement('span');
       t.innerHTML = '#' + (i + 1) + ' · <b></b>';
-      t.querySelector('b').textContent = (r.rec.isTemporal ? 'TEMPORAL · ' : '') + (r.rec.app || '—') + ' · ' + (r.rec.email || '—');
+      t.querySelector('b').textContent = (r.rec.isTemporal ? 'TEMPORAL · ' : '') + accName(r.rec) + ' · ' + (r.rec.email || '—');
       top.appendChild(t);
       if (r.missing.length) {
         var w = document.createElement('span');
@@ -403,31 +476,97 @@
       list.appendChild(box);
       fit(ta);
     });
+  }
 
-    scriptBox.hidden = !(scriptMode === 'aparte' && current.length);
-    if (!scriptBox.hidden) fit(scriptTa);
+  function accLabel(r, i, extra) {
+    var nm = document.createElement('span');
+    nm.className = 'nm';
+    nm.textContent = '#' + (i + 1) + ' ' + accName(r.rec) + ' · ' + (r.rec.email || '—') + ' ';
+    if (extra) { var sm = document.createElement('small'); sm.textContent = extra; nm.appendChild(sm); }
+    return nm;
+  }
 
-    var bad = current.filter(function (r) { return r.missing.length; }).length;
-    var st = $('status');
-    if (!current.length) { st.textContent = ''; }
-    else if (bad) { st.textContent = 'Revisar ' + bad + ' de ' + current.length; st.style.color = '#F2B36B'; }
-    else { st.textContent = current.length === 1 ? 'Listo' : current.length + ' listos'; st.style.color = '#5FD39A'; }
+  function renderPerAccount() {
+    var many = current.length > 1;
 
-    copyAllBtn.textContent = current.length > 1 ? 'Copiar todos (' + current.length + ')' : 'Copiar mensaje';
-    copyAllBtn.classList.remove('ok');
-    copyAllBtn.disabled = !current.length;
+    // Perfil por cuenta
+    var perProf = $('perProf'), pl = $('perProfList');
+    perProf.hidden = !many;
+    pl.innerHTML = '';
+    if (many) {
+      current.forEach(function (r, i) {
+        var row = document.createElement('div');
+        row.className = 'acc';
+        if (r.rec.isComplete) {
+          row.appendChild(accLabel(r, i, 'cuenta completa, sin perfil'));
+        } else {
+          var srcTxt = r.src === 'texto' ? '(del texto)' : r.src === 'cuenta' ? '(elegido aquí)' : '';
+          row.appendChild(accLabel(r, i, srcTxt));
+          var mini = document.createElement('div');
+          mini.className = 'mini';
+          for (var n = 1; n <= 7; n++) {
+            (function (n) {
+              var b = document.createElement('button');
+              b.type = 'button';
+              b.className = 'pick' + (r.prof === n ? ' on' : '');
+              b.textContent = n;
+              b.setAttribute('aria-label', 'Cuenta ' + (i + 1) + ' perfil ' + n);
+              b.addEventListener('click', function () {
+                if (profOv[i] === n) delete profOv[i]; else profOv[i] = n;
+                update();
+              });
+              mini.appendChild(b);
+            })(n);
+          }
+          row.appendChild(mini);
+        }
+        pl.appendChild(row);
+      });
+    }
 
-    $('iCount').textContent = current.length;
-    $('iKind').textContent = mode === 'renov' ? 'Renovación' : 'Venta';
-    document.querySelectorAll('#profiles .pick').forEach(function (b) {
-      b.classList.toggle('on', Number(b.dataset.n) === profile);
+    // Nueva clave por cuenta (solo renovación)
+    var perPass = $('perPass'), ppl = $('perPassList');
+    perPass.hidden = !(many && mode === 'renov');
+    ppl.innerHTML = '';
+    if (many && mode === 'renov') {
+      current.forEach(function (r, i) {
+        var row = document.createElement('div');
+        row.className = 'acc';
+        var lab = document.createElement('label');
+        lab.className = 'chk';
+        var cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = r.apply;
+        cb.addEventListener('change', function () { passOv[i] = cb.checked; update(); });
+        lab.appendChild(cb);
+        lab.appendChild(accLabel(r, i, r.newApplied ? '→ nueva clave' : '→ mantiene su clave'));
+        row.appendChild(lab);
+        ppl.appendChild(row);
+      });
+    }
+  }
+
+  function renderGift() {
+    var gifts = current.filter(function (r) { return r.rec.isGift; });
+    $('giftField').hidden = !gifts.length;
+    if (!gifts.length) return;
+    var sel = giftInfo(gifts[0].rec);
+    var box = $('giftPlats');
+    box.innerHTML = '';
+    GIFT_PLATS.forEach(function (g) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'pick' + (sel && sel.id === g.id ? ' on' : '');
+      b.textContent = g.label;
+      b.addEventListener('click', function () { giftPlat = g.id; update(); });
+      box.appendChild(b);
     });
   }
 
   function fit(ta) { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; }
   window.addEventListener('resize', function () { current.forEach(function (r) { if (r.ta) fit(r.ta); }); });
 
-  // ---------- Copiar ----------
+  // ================== COPIAR ==================
   function copyText(text, btn, label) {
     var done = function () {
       btn.textContent = '¡Copiado!';
@@ -464,20 +603,67 @@
     }
     copyText(out, copyAllBtn, label);
   });
+  $('copyScript').addEventListener('click', function () { copyText(scriptTa.value, $('copyScript'), 'Copiar script'); });
+  scriptTa.addEventListener('input', function () { fit(scriptTa); });
 
-  $('clear').addEventListener('click', function () {
-    raw.value = ''; newpass.value = CLAVE_MES; useNewChk.checked = true; profile = null; scriptTa.value = SCRIPT_SISTEMA; scriptMode = 'junto'; document.querySelectorAll('.smodes .pick').forEach(function (b) { b.classList.toggle('on', b.dataset.s === 'junto'); }); setMode('venta'); raw.focus();
+  // ================== CONTROLES ==================
+  for (var n = 1; n <= 7; n++) {
+    var pb = document.createElement('button');
+    pb.type = 'button';
+    pb.className = 'pick';
+    pb.textContent = n;
+    pb.setAttribute('aria-label', 'Perfil ' + n + ' para todas');
+    pb.dataset.n = n;
+    pb.addEventListener('click', function () {
+      var v = Number(this.dataset.n);
+      profile = (profile === v) ? null : v;
+      profOv = {}; // el general manda sobre lo elegido por cuenta
+      update();
+    });
+    $('profiles').appendChild(pb);
+  }
+
+  function setMode(m) {
+    mode = m;
+    $('mVenta').classList.toggle('on', m === 'venta');
+    $('mRenov').classList.toggle('on', m === 'renov');
+    $('renovBox').classList.toggle('show', m === 'renov');
+    update();
+  }
+  $('mVenta').addEventListener('click', function () { setMode('venta'); });
+  $('mRenov').addEventListener('click', function () { setMode('renov'); newpass.focus(); });
+
+  function setScriptMode(m) {
+    scriptMode = m;
+    document.querySelectorAll('.smodes .pick').forEach(function (b) { b.classList.toggle('on', b.dataset.s === m); });
+    update();
+  }
+  document.querySelectorAll('.smodes .pick').forEach(function (b) {
+    b.addEventListener('click', function () { setScriptMode(b.dataset.s); });
   });
 
-  // ---------- Pegado ----------
+  newpass.addEventListener('input', update);
+  useNewChk.addEventListener('change', function () { passOv = {}; update(); });
+
+  $('clear').addEventListener('click', function () {
+    raw.value = ''; newpass.value = CLAVE_MES; useNewChk.checked = true;
+    profile = null; profOv = {}; passOv = {}; giftPlat = null;
+    scriptTa.value = SCRIPT_SISTEMA;
+    scriptMode = 'junto';
+    document.querySelectorAll('.smodes .pick').forEach(function (b) { b.classList.toggle('on', b.dataset.s === 'junto'); });
+    setMode('venta');
+    raw.focus();
+  });
+
+  // ================== PEGADO ==================
   function onNewText() {
+    profOv = {}; passOv = {};
+    if (!raw.value.trim()) giftPlat = null;
     var looksLabeled = /CORREO/i.test(raw.value) && /CONTRASE.{1,2}A/i.test(raw.value);
     if (looksLabeled && mode !== 'renov') { profile = null; setMode('renov'); return; }
     update();
   }
   raw.addEventListener('input', onNewText);
-  newpass.addEventListener('input', update);
-  useNewChk.addEventListener('change', function () { newpass.disabled = !useNewChk.checked; update(); });
 
   // Ctrl+V en cualquier parte de la página pega directo en "Texto de la cuenta"
   document.addEventListener('paste', function (e) {
